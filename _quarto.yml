@@ -15,9 +15,9 @@ website:
   navbar:
     left:
       - text: My CV
-        href: about.qmd
+        file: about.qmd
       - text: Posts
-        href: posts/index.qmd
+        file: posts/index.qmd
 
 format:
   html:
