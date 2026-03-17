@@ -18,9 +18,9 @@ about:
 
 ## Hi, I'm Andy
 
-I recently graduated with a **Bachelor of Economics** and am currently pursuing a **Master of Business** at Monash University. I've built a strong foundation in **data-driven decision making**. My interest in business analytics really crystallised after second year when I took **machine learning** and **forecasting** units since then I've been working toward a professional analytics career.
+I hold a **Bachelor of Economics** from Monash University and am completing my **Master of Business Analytics**, due to graduate in **July 2026**. Upon graduation I will be applying for a **Subclass 485 Graduate Visa**, so there are no work eligibility concerns. Therefore, I am fully available for full-time employment in Australia from July onwards.
 
-My academic journey through research and team projects at Monash has sharpened my analytical thinking and deepened my understanding of business strategy. I'm comfortable turning ambiguous questions into analysis plans and communicating results clearly to non-technical audiences.
+My interest in analytics took off after diving into **machine learning** and **forecasting** during my undergraduate years, and I have since built that into real industry experience across data integration, reporting automation, and interactive dashboards. I am comfortable taking ambiguous problems end-to-end and communicating results clearly to both technical and non-technical stakeholders.
 
 ### Core skills
 - **Analytics:** exploratory analysis, visualisation, forecasting, basic ML (classification/regression), experiment design
@@ -32,5 +32,5 @@ My academic journey through research and team projects at Monash has sharpened m
 - Experience with **Python** (pandas), **SQL**, **EViews**
 - Git/GitHub, Microsoft Office
 
-### Open to projects & internships
-I'm keen to contribute to **data projects or internships** where I can work end-to-end: scoping the problem, building clean datasets, exploring and modelling, and packaging results into reproducible reports or dashboards. I enjoy messy real-world data, quick iteration with feedback, and collaborating with domain experts to ship something genuinely useful.
+### Open to Graduate Programs & Full-Time Roles
+I am actively seeking **graduate programs and full-time positions** in data analytics or business intelligence. I will be completing my **Master of Business Analytics at Monash University in July 2026** and am ready to bring hands-on industry experience in R, Shiny, SQL, and reporting automation to a full-time team.

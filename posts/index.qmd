@@ -1,6 +1,6 @@
 ---
-title: ""
-title-block-banner: "#a3abb6ff"
+title: "Andy's Projects & Posts"
+title-block-banner: false
 listing:
   contents: .
   sort: "date desc"
@@ -10,3 +10,5 @@ listing:
   filter-ui: true
   fields: [image, title, description, date, categories, reading-time]
 ---
+
+Welcome! This is a collection of my projects, analyses, and write-ups across data analytics, machine learning, and business intelligence. Each post walks through the problem, methodology, and key findings. So please have a look and feel free to reach out if anything catches your eye.
