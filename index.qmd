@@ -24,12 +24,12 @@ My interest in analytics took off after diving into **machine learning** and **f
 
 ### Core skills
 - **Analytics:** exploratory analysis, visualisation, forecasting, basic ML (classification/regression), experiment design
-- **Data work:** wrangling, feature engineering, data quality checks, reproducible reporting (Quarto)
+- **Data work:** wrangling, feature engineering, data quality checks, reproducible reporting (Quarto), dashboard development (Shiny)
 - **Business:** requirements gathering, stakeholder communication, presenting insights
 
 ### Toolbox
-- **R** (tidyverse, ggplot2, Quarto), **Excel** (advanced formulas/Power Query)
-- Experience with **Python** (pandas), **SQL**, **EViews**
+- **R** (tidyverse, ggplot2, Quarto, Shiny), **Excel** (advanced formulas/Power Query)
+- **SQL**, **Qlik**, **Python** (pandas), **EViews**
 - Git/GitHub, Microsoft Office
 
 ### Open to Graduate Programs & Full-Time Roles
