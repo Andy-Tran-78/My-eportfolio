@@ -67,49 +67,49 @@
     "href": "about.html",
     "title": "Andy Tran Resume",
     "section": "",
-    "text": "Data analyst with strengths in R/Python, reproducible analysis (Quarto), and economics knowledge/skills. Passionate about clear communication and building useful tools."
+    "text": "Data analyst with advanced R Studio and Shiny expertise, hands-on industry experience in data integration and reporting automation, and a strong foundation in economics and business analytics."
   },
   {
     "objectID": "about.html#profile",
     "href": "about.html#profile",
     "title": "Andy Tran Resume",
     "section": "",
-    "text": "Data analyst with strengths in R/Python, reproducible analysis (Quarto), and economics knowledge/skills. Passionate about clear communication and building useful tools."
+    "text": "Data analyst with advanced R Studio and Shiny expertise, hands-on industry experience in data integration and reporting automation, and a strong foundation in economics and business analytics."
   },
   {
-    "objectID": "about.html#experience",
-    "href": "about.html#experience",
+    "objectID": "about.html#key-skills",
+    "href": "about.html#key-skills",
     "title": "Andy Tran Resume",
-    "section": "Experience",
-    "text": "Experience\n\nKitchen Crew — Mcdonald, Bourke & Russell, Melbourne, Australia (August 2023 - January 2024)\n\nProvided high-quality customer service in a fast-paced environment, enhancing customer satisfaction and repeat business.\nCollaborated effectively with team members to manage orders efficiently and ensure seamless operations.\n\n\n\nTeam members — AIESEC, Melbourne, Australia (November 2024 – present)\n\nIdentified and pursued partnership opportunities to expand AIESEC’s network and visibility.\nNegotiated agreements with corporate partners, securing sponsorships to support organisational goals."
+    "section": "Key Skills",
+    "text": "Key Skills\nR Studio (Main Skill): Advanced expertise in data analysis, statistical computing, and modelling.\nShiny App: Advanced user with the ability to create a diverse type of dashboard for report purpose.\nPython: Possesses a foundational understanding of Python.\nExcel: Proficient in Excel, routinely utilized in conjunction with R Studio.\nEViews: Basic familiarity with EViews, capable of generating simple graphs and extracting key statistical data from datasets.\nSQL: Can utilise to source, cleanse, and reconcile data for weekly reporting, supporting a consolidated dataset/database for planning insights.\nQlik: Confident navigating Qlik to pull weekly performance and operational data, verify data quality, and integrate outputs into an R-built reporting database.\nResearch & Team Collaboration: Strong project management across multiple workstreams; effective contributor in diverse teams (Monash University + industry placement)."
   },
   {
     "objectID": "about.html#education",
     "href": "about.html#education",
     "title": "Andy Tran Resume",
     "section": "Education",
-    "text": "Education\n\nBachelor of Economics, Majoring in Business Analytics — Monash University (2022 – 2024)\n\nA three-year program focused on economic theory, quantitative analysis.\nDeveloped robust research and analytical skills through collaborative teamwork and involvement in large-scale projects.\n\n\n\nMaster of Business Analytics — Monash University (2025 – 2026)\n\nA rigorous 1.5-year program, expedited by the completion of advanced preparatory units.\nFocused on deepening expertise in analytics, machine learning, and business optimization.\nCollaborated with esteemed professors on research projects to further refine and enhance practical analytical skills."
+    "text": "Education\n\nMaster of Business Analytics — Monash University\n\n\nBachelor of Economics | Major in Business Analysis — Monash University"
   },
   {
-    "objectID": "about.html#skills",
-    "href": "about.html#skills",
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
     "title": "Andy Tran Resume",
-    "section": "Skills",
-    "text": "Skills\nR / RStudio (Advanced): data wrangling, statistical computing, modelling; reproducible workflows (Quarto); visualisation with ggplot2.\nExcel (Proficient): advanced formulas, charts; Power Query; often paired with R for analysis.\nPython (Foundational): pandas-based data manipulation and analysis.\nSQL (Basic): selects, joins, aggregations.\nEViews (Basic): produce charts and extract key statistical outputs.\nMicrosoft Office: Word, PowerPoint, Outlook, OneNote, Publisher.\nAnalytics & Collaboration\n\nResearch & teamwork: manage multiple concurrent research projects; integrate smoothly into diverse team settings (Monash).\nAnalytics: exploratory analysis, data quality checks, visualisation, statistical modelling, simulation.\n\nMachine Learning (R)\n\nDimension reduction (e.g., PCA), supervised & unsupervised learning, cross-validation/regularisation, and optimisation techniques in a reproducible environment.\n\nForecasting (R)\n\nTime-series decomposition, exponential smoothing, ARIMA, and regression with autocorrelated disturbances."
+    "section": "Experience",
+    "text": "Experience\n\nFinancial Data Analyst Intern — Commercial Finance Team (March 2026 – Present)\n\nDeveloping a structured reporting database for the Commercial Finance team under manager guidance.\nConsolidating and transforming financial data to a better format to improve data accessibility and reporting consistency.\nDesigning automation tools to streamline reporting workflows and reduce manual workload across the team.\n\n\n\nData Analyst Intern — S&OP Team (Nov 2025 – February 2026)\n\nManaged multiple projects concurrently to support S&OP reporting and analysis.\nExtracted and prepared operational data using SQL, Qlik, and Pronto.\nConsolidated data sources and built a structured reporting database using R, improving consistency and reusability for weekly reporting.\n\n\n\nAIESEC — Business Development Officer (Nov 2024 – Nov 2025)\n\nIdentified and pursued partnership opportunities to expand AIESEC’s network and visibility.\nNegotiated agreements with corporate partners, securing sponsorships to support organisational goals."
   },
   {
     "objectID": "about.html#projects",
     "href": "about.html#projects",
     "title": "Andy Tran Resume",
     "section": "Projects",
-    "text": "Projects\n\nWater Availability Prediction Optimization (Monash, May 2024) — Built and tuned a Random Forest classifier in R on African water-source data; delivered 72.3% balanced accuracy, enabling lower monitoring costs and better resource allocation.\nBlackjack Simulation for R (Monash, Apr 2025) — Co-developed a modular R package with single-player, multi-player, and Monte-Carlo simulation modes (configurable draw thresholds) for strategy testing and teaching. GitHub"
+    "text": "Projects\n\nFinance Data Integration & Database Development\nJBS Australia Pork (Rivalea), Commercial Finance Team, under Diogo | Mar 2026 – Present\n\nDescription: Developing a centralised finance database using R to consolidate financial and operational data from multiple internal sources into a structured dataset for reporting and analysis.\nObjective: Improve data accessibility and consistency by standardising data structures and reducing manual data preparation for finance reporting and analysis.\n\n\n\nShipment Suggestion & Batch Consolidation Tool\nJBS Australia Pork (Rivalea), Logistic Team, under Bhavika | Jan 2025 – Present\n\nDescription: Developed an R-based shipment batching algorithm that consolidates order lines into optimal shipment groups based on product, client, and establishment constraints.\nObjective: Automate shipment grouping logic previously done manually, ensuring consistent batch creation while respecting operational constraints such as Client, Establishment, and Product separation rules.\nResults: Reduced manual shipment planning effort, improved pallet space utilisation, and provided a repeatable and scalable shipment suggestion process for planners.\n\n\n\nDatabase Automation & Reporting Pipeline\nJBS Australia Pork (Rivalea), S&OP Team, under Luiz Wegner | Completed: Dec 2025\n\nDescription: Built an automated data pipeline to extract and consolidate operational data from SQL, Qlik, Pronto, and email-based inputs into a single, report-ready database using R.\nObjective: Reduce manual processing time and improve reliability of weekly S&OP reporting datasets.\nResults: Reduced end-to-end refresh time from ~2 hours (manual process) to ~10 seconds through automation and standardised transformations, enabling faster reporting turnaround and improved data consistency.\n\n\n\nShiny Interactive Dashboard\nJBS Australia Pork (Rivalea), S&OP Team, under Eduardo Ribeiro | Completed: Dec 2025\n\nDescription: Developed an end-to-end Shiny application that ingests Excel inputs and transforms them into a calculated yield database. Implemented an allocation editor (week/location/primal) with validation logic and interactive stacked-bar visualisations showing kg composition by cut option and allocation labels. Added hover tooltips to surface different type of information at segment level.\nObjective: Allow the user to input the data from their local data and edit the data using the interactive dashboard until they are satisfied with the result and download the result to the local file.\nResults: Reduced scenario-testing time from manual spreadsheet edits to near real-time “what-if” analysis, improved transparency of assumptions via drill-down tooltips, and enabled faster weekly planning discussions by making allocation impacts visible across 52 weeks and multiple sites. The dashboard can also be posted online allowing non-coding users to work with analysis results.\n\n\n\nBlackjack Simulation for R\nMonash University, under Prof. Rob Hyndman | Completed: April 2025\n\nDescription: Worked in group to create a modular Blackjack game package in R, supporting three key modes: Single-player, Multiplayer with unlimited players, and Simulation mode with customizable draw thresholds.\nGitHub"
   },
   {
     "objectID": "about.html#contact",
     "href": "about.html#contact",
     "title": "Andy Tran Resume",
     "section": "Contact",
-    "text": "Contact\n\nEmail: jakeyhuy@gmail.com\nPhone number: +61 413 385 460\nLocation: Docklands, Melbourne, Australia"
+    "text": "Contact\n\nEmail: jakeyhuy@gmail.com\nPhone: +61 413 385 460\nLocation: Docklands, Melbourne"
   },
   {
     "objectID": "posts/index.html",
