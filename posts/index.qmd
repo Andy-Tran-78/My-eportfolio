@@ -1,0 +1,12 @@
+---
+title: ""
+title-block-banner: "#a3abb6ff"
+listing:
+  contents: .
+  sort: "date desc"
+  type: default
+  page-size: 6
+  categories: true
+  filter-ui: true
+  fields: [image, title, description, date, categories, reading-time]
+---

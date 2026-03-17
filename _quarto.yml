@@ -1,0 +1,30 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - about.qmd
+    - index.qmd
+    - posts/index.qmd
+    - posts/assignment_3/index.qmd
+
+
+website:
+  title: "About me"
+  favicon: my_picture.png
+  search: true
+  navbar:
+    left:
+      - text: My CV
+        href: about.qmd
+      - text: Posts
+        href: posts/index.qmd
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: true
+    code-fold: show
+    smooth-scroll: true
+
+freeze: auto
