@@ -5,15 +5,17 @@ about:
   links:
     - icon: github
       text: Github
-      href: https://github.com/Jakey-vn
+      href: https://github.com/Andy-Tran-78
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/huy-tran-167223303/
 ---
 
-## Profile
+## About Me
 
-Data analyst with advanced R Studio and Shiny expertise, hands-on industry experience in data integration and reporting automation, and a strong foundation in economics and business analytics.
+A results-driven Data Analytics graduate currently pursuing a Master of Business Analytics at Monash University, with hands-on expertise in R, Excel, SQL, Qlik, and Power Query. Skilled in building automated pipelines, interactive dashboards, and structured reporting solutions that turn complex data into clear, actionable insights.
+
+Beyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP — each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager.
 
 ---
 
@@ -23,15 +25,15 @@ Data analyst with advanced R Studio and Shiny expertise, hands-on industry exper
 
 **Shiny App:** Advanced user with the ability to create a diverse type of dashboard for report purpose.
 
-**Python:** Possesses a foundational understanding of Python.
-
-**Excel:** Proficient in Excel, routinely utilized in conjunction with R Studio.
-
-**EViews:** Basic familiarity with EViews, capable of generating simple graphs and extracting key statistical data from datasets.
-
-**SQL:** Can utilise to source, cleanse, and reconcile data for weekly reporting, supporting a consolidated dataset/database for planning insights.
+**SQL:** Can utilise to source, cleanse, and reconcile data for weekly reporting, supporting a consolidated dataset/database for planning insights, and building SQL-based reports in MS SQL Server Management Studio.
 
 **Qlik:** Confident navigating Qlik to pull weekly performance and operational data, verify data quality, and integrate outputs into an R-built reporting database.
+
+**Excel & Power Query:** Proficient in Excel and Power Query, routinely utilised in conjunction with R Studio for data preparation and reporting.
+
+**Python:** Possesses a foundational understanding of Python.
+
+**EViews:** Basic familiarity with EViews, capable of generating simple graphs and extracting key statistical data from datasets.
 
 **Research & Team Collaboration:** Strong project management across multiple workstreams; effective contributor in diverse teams (Monash University + industry placement).
 
@@ -39,20 +41,25 @@ Data analyst with advanced R Studio and Shiny expertise, hands-on industry exper
 
 ## Education
 
-### Master of Business Analytics — Monash University
+### Master of Business Analytics — Monash University *(Completed July 2026)*
 
-### Bachelor of Economics | Major in Business Analysis — Monash University
+### Bachelor of Economics | Major in Business Analysis — Monash University *(Completed 2024)*
 
 ---
 
 ## Experience
 
-### Financial Data Analyst Intern — Commercial Finance Team *(March 2026 – Present)*
+### Functional Analyst — JBS Australia HQ, IT Team *(June 2026 – Present)*
+- Acting as the bridge between business stakeholders and the development team for JBS's Order to Cash systems, covering Sales, Pricing, Rebates, Accruals, Invoicing, Shipping, Billing, and Inventory Management.
+- Translating business needs into functional specifications and system designs, building SQL-based reports in MS SQL Server Management Studio, and writing and executing test plans.
+- Supporting end users through documentation and training on new and modified systems.
+
+### Financial Data Analyst Intern — JBS Australia Pork (Rivalea), Commercial Finance Team *(March 2026 – June 2026)*
 - Developing a structured reporting database for the Commercial Finance team under manager guidance.
 - Consolidating and transforming financial data to a better format to improve data accessibility and reporting consistency.
 - Designing automation tools to streamline reporting workflows and reduce manual workload across the team.
 
-### Data Analyst Intern — S&OP Team *(Nov 2025 – February 2026)*
+### Data Analyst Intern — JBS Australia Pork (Rivalea), S&OP Team *(Nov 2025 – February 2026)*
 - Managed multiple projects concurrently to support S&OP reporting and analysis.
 - Extracted and prepared operational data using SQL, Qlik, and Pronto.
 - Consolidated data sources and built a structured reporting database using R, improving consistency and reusability for weekly reporting.
@@ -66,13 +73,13 @@ Data analyst with advanced R Studio and Shiny expertise, hands-on industry exper
 ## Projects
 
 ### Finance Data Integration & Database Development
-**JBS Australia Pork (Rivalea), Commercial Finance Team, under Diogo | Mar 2026 – Present**
+**JBS Australia Pork (Rivalea), Commercial Finance Team, under Diogo | Mar 2026 – June 2026**
 
 - **Description:** Developing a centralised finance database using R to consolidate financial and operational data from multiple internal sources into a structured dataset for reporting and analysis.
 - **Objective:** Improve data accessibility and consistency by standardising data structures and reducing manual data preparation for finance reporting and analysis.
 
 ### Shipment Suggestion & Batch Consolidation Tool
-**JBS Australia Pork (Rivalea), Logistic Team, under Bhavika | Jan 2025 – Present**
+**JBS Australia Pork (Rivalea), Logistic Team, under Bhavika | Jan 2026 – June 2026**
 
 - **Description:** Developed an R-based shipment batching algorithm that consolidates order lines into optimal shipment groups based on product, client, and establishment constraints.
 - **Objective:** Automate shipment grouping logic previously done manually, ensuring consistent batch creation while respecting operational constraints such as Client, Establishment, and Product separation rules.
@@ -90,13 +97,19 @@ Data analyst with advanced R Studio and Shiny expertise, hands-on industry exper
 
 - **Description:** Developed an end-to-end Shiny application that ingests Excel inputs and transforms them into a calculated yield database. Implemented an allocation editor (week/location/primal) with validation logic and interactive stacked-bar visualisations showing kg composition by cut option and allocation labels. Added hover tooltips to surface different type of information at segment level.
 - **Objective:** Allow the user to input the data from their local data and edit the data using the interactive dashboard until they are satisfied with the result and download the result to the local file.
-- **Results:** Reduced scenario-testing time from manual spreadsheet edits to near real-time "what-if" analysis, improved transparency of assumptions via drill-down tooltips, and enabled faster weekly planning discussions by making allocation impacts visible across 52 weeks and multiple sites. The dashboard can also be posted online allowing non-coding users to work with analysis results.
+- **Results:** Reduced scenario-testing time from manual spreadsheet edits to near real-time "what-if" analysis, improved transparency of assumptions via drill-down tooltips, and enabled faster weekly planning discussions by making allocation impacts visible across 52 weeks and multiple sites. The dashboard can also be posted online, allowing non-coding users to work with analysis results.
 
 ### Blackjack Simulation for R
 **Monash University, under Prof. Rob Hyndman | Completed: April 2025**
 
 - **Description:** Worked in group to create a modular Blackjack game package in R, supporting three key modes: Single-player, Multiplayer with unlimited players, and Simulation mode with customizable draw thresholds.
 - [GitHub](https://github.com/MonashARP/game-package-bilbies.git)
+
+---
+
+## References
+
+Available upon request.
 
 ---
 
