@@ -5,3 +5,9 @@
 
 /.quarto/
 **/*.quarto_ipynb
+
+# Confidential source material for the Data Collection project.
+# Real company data (stock, sales orders, customers, finance) + code with
+# internal file paths. Kept private on disk, NEVER published to GitHub.
+# The public write-up lives in posts/data_collection_jbs/ instead.
+/posts/Data collection project/

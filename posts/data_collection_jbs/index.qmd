@@ -1,0 +1,186 @@
+---
+title: "Building a Weekly Data Pipeline for Sales & Operations Planning"
+author: "Tran Dang Huy (Andy)"
+title-block-banner: false
+description: "How I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth."
+date: 2025-11-01
+categories: [Project, Data Engineering, R]
+image: cover.svg
+---
+
+::: {.callout-note appearance="simple"}
+The figures, customers and file contents shown in this project are **not** included here — this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.
+:::
+
+## The problem: too many files, not enough time
+
+While working on the **Sales & Operations Planning (S&OP)** side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed *one* clean, consolidated view of the business — how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially — across several production plants.
+
+The catch was that none of this data lived in one place. Each plant exported its own files, in its own format, from its own system:
+
+- **Stock on Hand (SOH)** came out as Excel workbooks.
+- **Dispatch** and **Open Sales** came out as CSVs, each with a different number of junk header rows to skip.
+- **Production** and **Forecast** lived in large master workbooks (including an `.xlsb` binary file).
+- **Finance** came as yet another set of workbooks with their own column names.
+
+Every week someone had to open a dozen files, clean them by hand, line up the columns, paste them together, and hope nothing was mistyped along the way. It was slow, easy to get wrong, and impossible to audit.
+
+I wanted to replace that with something I could run in a couple of clicks: **pick a week, get one clean dataset.**
+
+## What I built
+
+The solution is a small but complete data pipeline written in **R** (using the `tidyverse`, `readxl`, `readr` and `openxlsx`). At a high level it does four things:
+
+```{mermaid}
+flowchart LR
+    A[Raw weekly exports<br/>SOH · Dispatch · Production<br/>Sales · Finance · Forecast] --> B{{Master Code<br/>pick Year + Week}}
+    B --> C[Clean each source<br/>+ join on a common Key]
+    C --> D[One weekly file<br/>wWW_YYYY.xlsx]
+    D --> E[(Combined database<br/>all weeks · for BI reports)]
+```
+
+1. **Choose a week.** I set the target year and week at the top of the script.
+2. **Clean every source** into the same tidy shape.
+3. **Join everything together** on a single common key, then write out **one consolidated Excel file** for that week.
+4. **Stack every weekly file** into one big historical database that feeds reporting and dashboards.
+
+## How the data is organised
+
+The whole thing is built around a simple, predictable folder structure. Each week's raw exports live in their own folder, named by year and week number:
+
+```text
+Database/
+  2025/
+    Week_47/
+      Corowa - Dispatch.csv
+      Corowa - Open Sales.csv
+      Corowa_Laverton - SOH.xlsx
+      Laverton - Finance.xlsx
+      YTD Sales.xlsx
+      ...
+    Week_48/ ...
+  2026/
+    Week_01/ ...
+
+Complete_file/          <- one cleaned output per week
+  w47_2025.xlsx
+  w01_2026.xlsx
+  ...
+```
+
+Because the layout is always the same, the code never has to guess where anything is — it just needs to know *which week* I want. That predictability is what makes the pipeline repeatable.
+
+## The core idea: one key to join everything
+
+The trick that makes all these different files line up is a **composite key**. The same product ("Item") exists at more than one plant ("Location"), so neither one alone is unique. By combining them, every row in every source gets a single shared key I can join on:
+
+```r
+# One master list of every Item, expanded across every Location,
+# so each source can be matched back to it.
+Locations <- c("Corowa", "Laverton", "Port_Wakefield")
+
+foundation_expanded <- foundation %>%
+  tidyr::crossing(Location = Locations) %>%
+  mutate(Key = paste0(Item, Location))   # e.g. "10234Corowa"
+```
+
+Every other dataset builds the *same* `Key`, so no matter how messy the original export was, it snaps neatly onto this backbone.
+
+## Walking through the pipeline
+
+### 1. Pick the week
+
+Everything downstream keys off two variables at the very top. In production I can either hard-code them or let them default to the current week:
+
+```r
+# Year = as.numeric(format(Sys.Date(), "%Y"))
+# Week = as.numeric(format(Sys.Date(), "%V")) - 1
+Year   = 2026
+Week   = 3
+Week_2d   = sprintf("%02d", Week)   # -> "03"
+Year_Week = paste0(Year, Week_2d)   # -> "202603"
+```
+
+### 2. Clean each source into the same shape
+
+Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the `Key`. Dispatch is a good example — the raw CSV becomes three tidy columns:
+
+```r
+corowa_dispatch <- corowa_dispatch %>%
+  select(ItemKey, DeliveryWeight) %>%
+  rename(Item = ItemKey, Dispatch = DeliveryWeight) %>%
+  group_by(Item) %>%
+  summarise(Dispatch_corowa = sum(Dispatch, na.rm = TRUE), .groups = "drop") %>%
+  mutate(Key = paste0(Item, "Corowa"))
+```
+
+The same pattern is repeated for stock, production, forecast, finance and sales — each ending up as a small table keyed by `Key`. Handling each source's quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn't silently fail.
+
+### 3. Join it all into one table
+
+With every source reduced to the same tidy shape, assembling the master table is just a chain of left joins onto the foundation backbone:
+
+```r
+merged <- foundation_expanded %>%
+  left_join(corowa_dispatch_expanded,   by = "Key") %>%
+  left_join(laverton_dispatch_expanded, by = "Key") %>%
+  left_join(soh_expanded,               by = "Key") %>%
+  left_join(production_expanded,        by = "Key") %>%
+  left_join(forecast_expanded,          by = "Key") %>%
+  left_join(finance_expanded,           by = "Key")
+```
+
+Because each plant contributes its own column (`Dispatch_corowa`, `Dispatch_laverton`, …), I then **coalesce** them back into a single tidy column and replace the gaps with zero:
+
+```r
+final <- merged %>%
+  mutate(Dispatch = coalesce(Dispatch_corowa, Dispatch_laverton)) %>%
+  replace_na(list(Dispatch = 0, SOH = 0, Production = 0, `YTD Sales` = 0))
+```
+
+### 4. Write the weekly file
+
+Finally the consolidated table is stamped with the year/week and written to a predictably named file, so the output for any week is always easy to find:
+
+```r
+file_name <- paste0("Complete_file/w", Week_2d, "_", Year, ".xlsx")
+write.xlsx(complete_data, file = file_name, sheetName = "S&OP Stock Hand")
+```
+
+### 5. Combine every week into one database
+
+A separate short script scans the `Complete_file/` folder, reads every weekly output that matches the `wWW_YYYY.xlsx` naming pattern, and stacks them into a single historical database that BI reports can be built on top of:
+
+```r
+files <- list.files("complete_file",
+                    pattern = "^w\\d{2}_\\d{4}\\.xlsx$",
+                    full.names = TRUE)
+
+final_data <- files %>% purrr::map_dfr(~ read_excel(.x))
+
+write.xlsx(final_data, file = "S&OP Stock File - Database.xlsx")
+```
+
+## Keeping the data honest
+
+One extra piece I'm proud of is a small **quality-control check**. New product codes appear in the sales and production exports all the time, and if one isn't in the master item list yet, it would silently drop out of the report. So I wrote a helper that compares every incoming item against the master list and writes out anything it *doesn't* recognise:
+
+```r
+missing_items <- opensales_merging %>%
+  anti_join(foundation, by = "Item") %>%
+  distinct(Item, `Item Description`, `Cost Centre`, Origin)
+```
+
+That list gets exported each run, so gaps get caught and fixed instead of quietly corrupting the numbers.
+
+## Challenges and what I learned
+
+- **Real-world data is never tidy.** Most of the effort went into the unglamorous work of reconciling inconsistent formats — different header rows, mismatched column names, CSV vs. Excel vs. binary `.xlsb`, and item codes stored as numbers in one file and text in another.
+- **Design for repeatability.** Committing to one folder convention and one join key turned a fragile manual process into something I could re-run for any week with a two-line change.
+- **Fail loudly, not silently.** The missing-items check taught me that in data work, the dangerous errors aren't the ones that crash — they're the ones that quietly produce a plausible-but-wrong number.
+
+## The outcome
+
+What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It's scalable across weeks, years and plants, and — just as importantly — it's **auditable**: anyone can see exactly how each number was built.
+
+It's a small project, but it's a good example of the kind of work I enjoy: taking a messy, real operational problem and turning it into something clean, reliable and reusable.

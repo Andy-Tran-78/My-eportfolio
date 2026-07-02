@@ -6,6 +6,7 @@ project:
     - index.qmd
     - posts/index.qmd
     - posts/assignment_3/index.qmd
+    - posts/data_collection_jbs/index.qmd
 
 
 website:
