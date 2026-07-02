@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Tran Dang Huy (Andy)">
+<meta name="dcterms.date" content="2025-11-01">
+<meta name="description" content="How I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.">
+
+<title>Building a Weekly Data Pipeline for Sales &amp; Operations Planning – About me</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../my_picture.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-cc63fce9873912f1bbbccf05079cc9ea.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">About me</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">My CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts/index.html"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-problem-too-many-files-not-enough-time" id="toc-the-problem-too-many-files-not-enough-time" class="nav-link active" data-scroll-target="#the-problem-too-many-files-not-enough-time">The problem: too many files, not enough time</a></li>
+  <li><a href="#what-i-built" id="toc-what-i-built" class="nav-link" data-scroll-target="#what-i-built">What I built</a></li>
+  <li><a href="#how-the-data-is-organised" id="toc-how-the-data-is-organised" class="nav-link" data-scroll-target="#how-the-data-is-organised">How the data is organised</a></li>
+  <li><a href="#the-core-idea-one-key-to-join-everything" id="toc-the-core-idea-one-key-to-join-everything" class="nav-link" data-scroll-target="#the-core-idea-one-key-to-join-everything">The core idea: one key to join everything</a></li>
+  <li><a href="#walking-through-the-pipeline" id="toc-walking-through-the-pipeline" class="nav-link" data-scroll-target="#walking-through-the-pipeline">Walking through the pipeline</a>
+  <ul class="collapse">
+  <li><a href="#pick-the-week" id="toc-pick-the-week" class="nav-link" data-scroll-target="#pick-the-week">1. Pick the week</a></li>
+  <li><a href="#clean-each-source-into-the-same-shape" id="toc-clean-each-source-into-the-same-shape" class="nav-link" data-scroll-target="#clean-each-source-into-the-same-shape">2. Clean each source into the same shape</a></li>
+  <li><a href="#join-it-all-into-one-table" id="toc-join-it-all-into-one-table" class="nav-link" data-scroll-target="#join-it-all-into-one-table">3. Join it all into one table</a></li>
+  <li><a href="#write-the-weekly-file" id="toc-write-the-weekly-file" class="nav-link" data-scroll-target="#write-the-weekly-file">4. Write the weekly file</a></li>
+  <li><a href="#combine-every-week-into-one-database" id="toc-combine-every-week-into-one-database" class="nav-link" data-scroll-target="#combine-every-week-into-one-database">5. Combine every week into one database</a></li>
+  </ul></li>
+  <li><a href="#keeping-the-data-honest" id="toc-keeping-the-data-honest" class="nav-link" data-scroll-target="#keeping-the-data-honest">Keeping the data honest</a></li>
+  <li><a href="#challenges-and-what-i-learned" id="toc-challenges-and-what-i-learned" class="nav-link" data-scroll-target="#challenges-and-what-i-learned">Challenges and what I learned</a></li>
+  <li><a href="#the-outcome" id="toc-the-outcome" class="nav-link" data-scroll-target="#the-outcome">The outcome</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Building a Weekly Data Pipeline for Sales &amp; Operations Planning</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Project</div>
+    <div class="quarto-category">Data Engineering</div>
+    <div class="quarto-category">R</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    How I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Tran Dang Huy (Andy) </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 1, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>The figures, customers and file contents shown in this project are <strong>not</strong> included here — this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.</p>
+</div>
+</div>
+</div>
+<section id="the-problem-too-many-files-not-enough-time" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-too-many-files-not-enough-time">The problem: too many files, not enough time</h2>
+<p>While working on the <strong>Sales &amp; Operations Planning (S&amp;OP)</strong> side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed <em>one</em> clean, consolidated view of the business — how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially — across several production plants.</p>
+<p>The catch was that none of this data lived in one place. Each plant exported its own files, in its own format, from its own system:</p>
+<ul>
+<li><strong>Stock on Hand (SOH)</strong> came out as Excel workbooks.</li>
+<li><strong>Dispatch</strong> and <strong>Open Sales</strong> came out as CSVs, each with a different number of junk header rows to skip.</li>
+<li><strong>Production</strong> and <strong>Forecast</strong> lived in large master workbooks (including an <code>.xlsb</code> binary file).</li>
+<li><strong>Finance</strong> came as yet another set of workbooks with their own column names.</li>
+</ul>
+<p>Every week someone had to open a dozen files, clean them by hand, line up the columns, paste them together, and hope nothing was mistyped along the way. It was slow, easy to get wrong, and impossible to audit.</p>
+<p>I wanted to replace that with something I could run in a couple of clicks: <strong>pick a week, get one clean dataset.</strong></p>
+</section>
+<section id="what-i-built" class="level2">
+<h2 class="anchored" data-anchor-id="what-i-built">What I built</h2>
+<p>The solution is a small but complete data pipeline written in <strong>R</strong> (using the <code>tidyverse</code>, <code>readxl</code>, <code>readr</code> and <code>openxlsx</code>). At a high level it does four things:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    A[Raw weekly exports&lt;br/&gt;SOH · Dispatch · Production&lt;br/&gt;Sales · Finance · Forecast] --&gt; B{{Master Code&lt;br/&gt;pick Year + Week}}
+    B --&gt; C[Clean each source&lt;br/&gt;+ join on a common Key]
+    C --&gt; D[One weekly file&lt;br/&gt;wWW_YYYY.xlsx]
+    D --&gt; E[(Combined database&lt;br/&gt;all weeks · for BI reports)]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<ol type="1">
+<li><strong>Choose a week.</strong> I set the target year and week at the top of the script.</li>
+<li><strong>Clean every source</strong> into the same tidy shape.</li>
+<li><strong>Join everything together</strong> on a single common key, then write out <strong>one consolidated Excel file</strong> for that week.</li>
+<li><strong>Stack every weekly file</strong> into one big historical database that feeds reporting and dashboards.</li>
+</ol>
+</section>
+<section id="how-the-data-is-organised" class="level2">
+<h2 class="anchored" data-anchor-id="how-the-data-is-organised">How the data is organised</h2>
+<p>The whole thing is built around a simple, predictable folder structure. Each week’s raw exports live in their own folder, named by year and week number:</p>
+<pre class="text"><code>Database/
+  2025/
+    Week_47/
+      Corowa - Dispatch.csv
+      Corowa - Open Sales.csv
+      Corowa_Laverton - SOH.xlsx
+      Laverton - Finance.xlsx
+      YTD Sales.xlsx
+      ...
+    Week_48/ ...
+  2026/
+    Week_01/ ...
+
+Complete_file/          &lt;- one cleaned output per week
+  w47_2025.xlsx
+  w01_2026.xlsx
+  ...</code></pre>
+<p>Because the layout is always the same, the code never has to guess where anything is — it just needs to know <em>which week</em> I want. That predictability is what makes the pipeline repeatable.</p>
+</section>
+<section id="the-core-idea-one-key-to-join-everything" class="level2">
+<h2 class="anchored" data-anchor-id="the-core-idea-one-key-to-join-everything">The core idea: one key to join everything</h2>
+<p>The trick that makes all these different files line up is a <strong>composite key</strong>. The same product (“Item”) exists at more than one plant (“Location”), so neither one alone is unique. By combining them, every row in every source gets a single shared key I can join on:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One master list of every Item, expanded across every Location,</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># so each source can be matched back to it.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Locations <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Corowa"</span>, <span class="st">"Laverton"</span>, <span class="st">"Port_Wakefield"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>foundation_expanded <span class="ot">&lt;-</span> foundation <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">crossing</span>(<span class="at">Location =</span> Locations) <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Key =</span> <span class="fu">paste0</span>(Item, Location))   <span class="co"># e.g. "10234Corowa"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Every other dataset builds the <em>same</em> <code>Key</code>, so no matter how messy the original export was, it snaps neatly onto this backbone.</p>
+</section>
+<section id="walking-through-the-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="walking-through-the-pipeline">Walking through the pipeline</h2>
+<section id="pick-the-week" class="level3">
+<h3 class="anchored" data-anchor-id="pick-the-week">1. Pick the week</h3>
+<p>Everything downstream keys off two variables at the very top. In production I can either hard-code them or let them default to the current week:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Year = as.numeric(format(Sys.Date(), "%Y"))</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Week = as.numeric(format(Sys.Date(), "%V")) - 1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>Year   <span class="ot">=</span> <span class="dv">2026</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Week   <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>Week_2d   <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Week)   <span class="co"># -&gt; "03"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>Year_Week <span class="ot">=</span> <span class="fu">paste0</span>(Year, Week_2d)   <span class="co"># -&gt; "202603"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="clean-each-source-into-the-same-shape" class="level3">
+<h3 class="anchored" data-anchor-id="clean-each-source-into-the-same-shape">2. Clean each source into the same shape</h3>
+<p>Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the <code>Key</code>. Dispatch is a good example — the raw CSV becomes three tidy columns:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>corowa_dispatch <span class="ot">&lt;-</span> corowa_dispatch <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ItemKey, DeliveryWeight) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Item =</span> ItemKey, <span class="at">Dispatch =</span> DeliveryWeight) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Item) <span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Dispatch_corowa =</span> <span class="fu">sum</span>(Dispatch, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Key =</span> <span class="fu">paste0</span>(Item, <span class="st">"Corowa"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The same pattern is repeated for stock, production, forecast, finance and sales — each ending up as a small table keyed by <code>Key</code>. Handling each source’s quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn’t silently fail.</p>
+</section>
+<section id="join-it-all-into-one-table" class="level3">
+<h3 class="anchored" data-anchor-id="join-it-all-into-one-table">3. Join it all into one table</h3>
+<p>With every source reduced to the same tidy shape, assembling the master table is just a chain of left joins onto the foundation backbone:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>merged <span class="ot">&lt;-</span> foundation_expanded <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(corowa_dispatch_expanded,   <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(laverton_dispatch_expanded, <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(soh_expanded,               <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(production_expanded,        <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(forecast_expanded,          <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(finance_expanded,           <span class="at">by =</span> <span class="st">"Key"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Because each plant contributes its own column (<code>Dispatch_corowa</code>, <code>Dispatch_laverton</code>, …), I then <strong>coalesce</strong> them back into a single tidy column and replace the gaps with zero:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>final <span class="ot">&lt;-</span> merged <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Dispatch =</span> <span class="fu">coalesce</span>(Dispatch_corowa, Dispatch_laverton)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">Dispatch =</span> <span class="dv">0</span>, <span class="at">SOH =</span> <span class="dv">0</span>, <span class="at">Production =</span> <span class="dv">0</span>, <span class="st">`</span><span class="at">YTD Sales</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="write-the-weekly-file" class="level3">
+<h3 class="anchored" data-anchor-id="write-the-weekly-file">4. Write the weekly file</h3>
+<p>Finally the consolidated table is stamped with the year/week and written to a predictably named file, so the output for any week is always easy to find:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Complete_file/w"</span>, Week_2d, <span class="st">"_"</span>, Year, <span class="st">".xlsx"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(complete_data, <span class="at">file =</span> file_name, <span class="at">sheetName =</span> <span class="st">"S&amp;OP Stock Hand"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="combine-every-week-into-one-database" class="level3">
+<h3 class="anchored" data-anchor-id="combine-every-week-into-one-database">5. Combine every week into one database</h3>
+<p>A separate short script scans the <code>Complete_file/</code> folder, reads every weekly output that matches the <code>wWW_YYYY.xlsx</code> naming pattern, and stacks them into a single historical database that BI reports can be built on top of:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"complete_file"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pattern =</span> <span class="st">"^w</span><span class="sc">\\</span><span class="st">d{2}_</span><span class="sc">\\</span><span class="st">d{4}</span><span class="sc">\\</span><span class="st">.xlsx$"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>final_data <span class="ot">&lt;-</span> files <span class="sc">%&gt;%</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="sc">~</span> <span class="fu">read_excel</span>(.x))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(final_data, <span class="at">file =</span> <span class="st">"S&amp;OP Stock File - Database.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="keeping-the-data-honest" class="level2">
+<h2 class="anchored" data-anchor-id="keeping-the-data-honest">Keeping the data honest</h2>
+<p>One extra piece I’m proud of is a small <strong>quality-control check</strong>. New product codes appear in the sales and production exports all the time, and if one isn’t in the master item list yet, it would silently drop out of the report. So I wrote a helper that compares every incoming item against the master list and writes out anything it <em>doesn’t</em> recognise:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>missing_items <span class="ot">&lt;-</span> opensales_merging <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(foundation, <span class="at">by =</span> <span class="st">"Item"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Item, <span class="st">`</span><span class="at">Item Description</span><span class="st">`</span>, <span class="st">`</span><span class="at">Cost Centre</span><span class="st">`</span>, Origin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That list gets exported each run, so gaps get caught and fixed instead of quietly corrupting the numbers.</p>
+</section>
+<section id="challenges-and-what-i-learned" class="level2">
+<h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
+<ul>
+<li><strong>Real-world data is never tidy.</strong> Most of the effort went into the unglamorous work of reconciling inconsistent formats — different header rows, mismatched column names, CSV vs.&nbsp;Excel vs.&nbsp;binary <code>.xlsb</code>, and item codes stored as numbers in one file and text in another.</li>
+<li><strong>Design for repeatability.</strong> Committing to one folder convention and one join key turned a fragile manual process into something I could re-run for any week with a two-line change.</li>
+<li><strong>Fail loudly, not silently.</strong> The missing-items check taught me that in data work, the dangerous errors aren’t the ones that crash — they’re the ones that quietly produce a plausible-but-wrong number.</li>
+</ul>
+</section>
+<section id="the-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
+<p>What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It’s scalable across weeks, years and plants, and — just as importantly — it’s <strong>auditable</strong>: anyone can see exactly how each number was built.</p>
+<p>It’s a small project, but it’s a good example of the kind of work I enjoy: taking a messy, real operational problem and turning it into something clean, reliable and reusable.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/Andy-Tran-78\.github\.io\/My-eportfolio\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

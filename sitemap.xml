@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://Andy-Tran-78.github.io/My-eportfolio/posts/assignment_3/index.html</loc>
-    <lastmod>2026-03-17T10:46:52.810Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Andy-Tran-78.github.io/My-eportfolio/index.html</loc>
-    <lastmod>2026-03-17T12:06:36.579Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Andy-Tran-78.github.io/My-eportfolio/about.html</loc>
-    <lastmod>2026-03-17T10:50:58.271Z</lastmod>
+    <loc>https://Andy-Tran-78.github.io/My-eportfolio/posts/data_collection_jbs/index.html</loc>
+    <lastmod>2026-07-02T00:17:05.982Z</lastmod>
   </url>
   <url>
     <loc>https://Andy-Tran-78.github.io/My-eportfolio/posts/index.html</loc>
-    <lastmod>2026-03-17T11:49:46.765Z</lastmod>
+    <lastmod>2026-07-01T23:55:31.958Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Andy-Tran-78.github.io/My-eportfolio/about.html</loc>
+    <lastmod>2026-07-01T23:55:31.881Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Andy-Tran-78.github.io/My-eportfolio/index.html</loc>
+    <lastmod>2026-07-01T23:55:31.887Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Andy-Tran-78.github.io/My-eportfolio/posts/assignment_3/index.html</loc>
+    <lastmod>2026-07-01T23:55:31.951Z</lastmod>
   </url>
 </urlset>
