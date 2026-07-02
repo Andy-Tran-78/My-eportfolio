@@ -4,7 +4,7 @@ author: "Tran Dang Huy (Andy)"
 title-block-banner: false
 description: "My manager's financial forecast lived in a 30MB Excel file that froze every time he touched it — useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality."
 date: 2026-05-01
-categories: [Project, R, Finance]
+categories: [Project, R, Data Engineering, Finance]
 image: cover.svg
 ---
 
