@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#f4f6f7"/>
+  <rect width="1200" height="140" fill="#2c3e50"/>
+  <text x="60" y="70" fill="#ffffff" font-size="44" font-weight="700">Batch Consolidation Engine</text>
+  <text x="60" y="112" fill="#18bc9c" font-size="24" font-weight="500">Packing stock into full batches with dynamic programming in R</text>
+
+  <!-- Left: loose items -->
+  <text x="60" y="210" fill="#2c3e50" font-size="22" font-weight="700">Loose stock</text>
+  <g>
+    <rect x="60"  y="230" width="70" height="120" rx="6" fill="#95a5a6"/><text x="95"  y="298" fill="#fff" font-size="26" font-weight="700" text-anchor="middle">26</text>
+    <rect x="145" y="270" width="70" height="80"  rx="6" fill="#95a5a6"/><text x="180" y="318" fill="#fff" font-size="24" font-weight="700" text-anchor="middle">15</text>
+    <rect x="230" y="290" width="70" height="60"  rx="6" fill="#95a5a6"/><text x="265" y="330" fill="#fff" font-size="22" font-weight="700" text-anchor="middle">12</text>
+    <rect x="60"  y="370" width="70" height="55"  rx="6" fill="#b0bec5"/><text x="95"  y="407" fill="#fff" font-size="22" font-weight="700" text-anchor="middle">10</text>
+    <rect x="145" y="380" width="70" height="45"  rx="6" fill="#b0bec5"/><text x="180" y="412" fill="#fff" font-size="20" font-weight="700" text-anchor="middle">8</text>
+    <rect x="230" y="395" width="70" height="30"  rx="6" fill="#cfd8dc"/><text x="265" y="417" fill="#546e7a" font-size="18" font-weight="700" text-anchor="middle">3</text>
+  </g>
+
+  <!-- Arrow -->
+  <g stroke="#18bc9c" stroke-width="6" fill="#18bc9c">
+    <line x1="330" y1="325" x2="415" y2="325"/>
+    <polygon points="415,308 445,325 415,342"/>
+  </g>
+
+  <!-- Right: packed batches (cap 36) -->
+  <text x="500" y="210" fill="#2c3e50" font-size="22" font-weight="700">Full batches (cap 36)</text>
+
+  <!-- Batch A: 26 + 10 = 36 -->
+  <rect x="500" y="225" width="150" height="200" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="3"/>
+  <rect x="508" y="315" width="134" height="102" rx="4" fill="#18bc9c"/><text x="575" y="375" fill="#fff" font-size="26" font-weight="700" text-anchor="middle">26</text>
+  <rect x="508" y="270" width="134" height="41"  rx="4" fill="#7fd8c6"/><text x="575" y="298" fill="#0b5c4c" font-size="22" font-weight="700" text-anchor="middle">10</text>
+  <text x="575" y="250" fill="#2c3e50" font-size="18" font-weight="700" text-anchor="middle">= 36</text>
+
+  <!-- Batch B: 15 + 12 + 8 + 1 = 36 -->
+  <rect x="675" y="225" width="150" height="200" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="3"/>
+  <rect x="683" y="358" width="134" height="59" rx="4" fill="#18bc9c"/><text x="750" y="395" fill="#fff" font-size="24" font-weight="700" text-anchor="middle">15</text>
+  <rect x="683" y="313" width="134" height="43" rx="4" fill="#4fc9b0"/><text x="750" y="342" fill="#fff" font-size="22" font-weight="700" text-anchor="middle">12</text>
+  <rect x="683" y="283" width="134" height="28" rx="4" fill="#7fd8c6"/><text x="750" y="304" fill="#0b5c4c" font-size="18" font-weight="700" text-anchor="middle">8</text>
+  <rect x="683" y="269" width="134" height="12" rx="3" fill="#a8e6da"/>
+  <text x="750" y="250" fill="#2c3e50" font-size="18" font-weight="700" text-anchor="middle">= 36</text>
+
+  <!-- Leftover: 3 -->
+  <rect x="850" y="225" width="150" height="200" rx="10" fill="#ffffff" stroke="#cfd8dc" stroke-width="3" stroke-dasharray="8 6"/>
+  <rect x="858" y="392" width="134" height="25" rx="4" fill="#cfd8dc"/><text x="925" y="411" fill="#546e7a" font-size="18" font-weight="700" text-anchor="middle">3</text>
+  <text x="925" y="250" fill="#90a4ae" font-size="18" font-weight="700" text-anchor="middle">leftover</text>
+
+  <text x="60" y="560" fill="#95a5a6" font-size="18">Fill big items first · leave as little loose stock as possible · ~30 min of manual work in seconds</text>
+</svg>

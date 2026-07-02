@@ -1,0 +1,108 @@
+---
+title: "Automating Batch Consolidation with Bin-Packing in R"
+author: "Tran Dang Huy (Andy)"
+title-block-banner: false
+description: "An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds."
+date: 2025-12-01
+categories: [Project, R, Optimisation]
+image: cover.svg
+---
+
+::: {.callout-note appearance="simple"}
+This is a public write-up of a work project, so the real stock data has been kept private. The numbers in the worked example below are made-up illustrations, not real figures.
+:::
+
+## The problem: a weekly packing puzzle done by hand
+
+An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock — many rows of items, each with a quantity — and had to **consolidate them into batches**. A batch normally holds up to **36 items** (a handful of special items, kept in a separate list, allow **72**).
+
+The catch is that you can't just throw anything together. A batch can only combine rows that share the **same item type** *and* come from the **same client and establishment (dispatch location)**. And the goal isn't just to make batches — it's to make **good** batches: fill each one as close to full as possible so you're left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what's left over, not what fills a batch.
+
+Doing this well, by hand, took about **30 minutes every week** — and it was easy to end up with more loose batches than necessary.
+
+## What I built
+
+A single R script. She drops the week's stock export into a `Database` folder, runs the script, and gets back an Excel file where **every row is tagged with a batch number** (`Group`) — packed optimally. That's it. The 30-minute puzzle became a few seconds.
+
+Under the hood, this is a classic **bin-packing problem**, and I solved each batch's fill with **dynamic programming** so the result is genuinely optimal, not just a rough guess.
+
+## How it works
+
+### Step 1 — Apply the business rules first
+
+Before any packing, the script cleans and filters the data: it drops items that aren't ready to ship (still pending a temperature change), applies a small cost-centre correction, and loads the special "list of 72" that gets the larger batch size.
+
+```r
+data <- read_excel("Database/Data.xlsx", skip = 4) %>%
+  filter(is.na(`Temperature Change Due`)) %>%      # only ship-ready stock
+  mutate(`Cost Centre` = if_else(Client == "DVP", "822", `Cost Centre`))
+
+list_72 <- read_excel("Database/List of 72.xlsx")   # items that pack up to 72
+```
+
+### Step 2 — Only pack things that are allowed to go together
+
+The script finds every unique combination of **(Client, Establishment, Product)** and treats each one as its own independent packing problem. That guarantees a batch never mixes item types or dispatch locations, and it also keeps each sub-problem small enough to solve exactly.
+
+```r
+keys <- unique(df[, c("Client", "Estab", "Product")])
+for (k in seq_len(nrow(keys))) {
+  # ...pack just the rows matching this Client + Estab + Product...
+  bs <- if (prod_val %in% list_72) 72 else 36   # special items get the bigger cap
+}
+```
+
+### Step 3 — Fill each batch as full as possible (the interesting bit)
+
+Within a group, the script repeatedly:
+
+1. picks the **largest remaining item** as the "anchor" of a new batch, then
+2. finds the **best combination of the other items** that fits in the space left, getting as close to the cap as possible.
+
+That second step is a subset-sum solved with dynamic programming — it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:
+
+```r
+best_subset_under <- function(qty, cap = 36) {
+  ord  <- order(qty, decreasing = TRUE)
+  qty2 <- qty[ord]
+  dp <- rep(FALSE, cap + 1); dp[1] <- TRUE   # dp[s] = "can we exactly reach total s?"
+
+  for (i in seq_along(qty2)) {
+    qi <- qty2[i]
+    if (is.na(qi) || qi <= 0 || qi > cap) next
+    for (s in seq(cap, qi, by = -1)) {
+      if (!dp[s + 1] && dp[(s - qi) + 1]) { dp[s + 1] <- TRUE; ... }
+    }
+  }
+  target <- if (dp[cap + 1]) cap else max(which(dp) - 1, 0)  # best fill <= cap
+  # ...walk back through the table to recover which items made up `target`...
+}
+```
+
+Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain — exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.
+
+### A worked example
+
+Say one item type, at one location, has these quantities waiting to ship, into batches of 36:
+
+> **26, 15, 12, 10, 8, 3, 1**
+
+The engine produces:
+
+| Batch | Items packed | Total |
+|-------|--------------|-------|
+| A | 26 + 10 | **36** ✅ full |
+| B | 15 + 12 + 8 + 1 | **36** ✅ full |
+| C | 3 | 3 — small leftover |
+
+Two perfectly full batches and a single small remainder — instead of several awkward, half-filled ones.
+
+## Challenges and what I learned
+
+- **Bin-packing is hard in general** (NP-hard), so a brute-force search over everything wouldn't scale. Splitting the data by the grouping rules first shrinks it into many *small* problems, each of which DP can solve exactly and instantly.
+- **The greedy-only trap.** Just stuffing the biggest items in first (a pure greedy approach) leaves gaps. Pairing a greedy anchor with an exact subset-sum fill gets the best of both: speed *and* full batches.
+- **Edge cases matter in operations.** Oversized rows, missing quantities, and type mismatches between the data and the "list of 72" all had to be handled, or a single odd row would break the run.
+
+## The outcome
+
+A weekly 30-minute manual puzzle became a one-click, few-seconds job — and the batches it produces are more consistently full than hand-packing achieved. It's a small script, but it's a good example of turning a real operational headache into a clean, optimal, repeatable process.

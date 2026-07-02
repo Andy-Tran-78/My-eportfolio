@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Tran Dang Huy (Andy)">
-<meta name="dcterms.date" content="2025-11-01">
-<meta name="description" content="How I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.">
+<meta name="dcterms.date" content="2025-12-01">
+<meta name="description" content="An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds.">
 
-<title>Building a Weekly Data Pipeline for Sales &amp; Operations Planning – About me</title>
+<title>Automating Batch Consolidation with Bin-Packing in R – About me</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -107,9 +107,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
-<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -156,19 +153,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-problem-too-many-files-not-enough-time" id="toc-the-problem-too-many-files-not-enough-time" class="nav-link active" data-scroll-target="#the-problem-too-many-files-not-enough-time">The problem: too many files, not enough time</a></li>
+  <li><a href="#the-problem-a-weekly-packing-puzzle-done-by-hand" id="toc-the-problem-a-weekly-packing-puzzle-done-by-hand" class="nav-link active" data-scroll-target="#the-problem-a-weekly-packing-puzzle-done-by-hand">The problem: a weekly packing puzzle done by hand</a></li>
   <li><a href="#what-i-built" id="toc-what-i-built" class="nav-link" data-scroll-target="#what-i-built">What I built</a></li>
-  <li><a href="#how-the-data-is-organised" id="toc-how-the-data-is-organised" class="nav-link" data-scroll-target="#how-the-data-is-organised">How the data is organised</a></li>
-  <li><a href="#the-core-idea-one-key-to-join-everything" id="toc-the-core-idea-one-key-to-join-everything" class="nav-link" data-scroll-target="#the-core-idea-one-key-to-join-everything">The core idea: one key to join everything</a></li>
-  <li><a href="#walking-through-the-pipeline" id="toc-walking-through-the-pipeline" class="nav-link" data-scroll-target="#walking-through-the-pipeline">Walking through the pipeline</a>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a>
   <ul class="collapse">
-  <li><a href="#pick-the-week" id="toc-pick-the-week" class="nav-link" data-scroll-target="#pick-the-week">1. Pick the week</a></li>
-  <li><a href="#clean-each-source-into-the-same-shape" id="toc-clean-each-source-into-the-same-shape" class="nav-link" data-scroll-target="#clean-each-source-into-the-same-shape">2. Clean each source into the same shape</a></li>
-  <li><a href="#join-it-all-into-one-table" id="toc-join-it-all-into-one-table" class="nav-link" data-scroll-target="#join-it-all-into-one-table">3. Join it all into one table</a></li>
-  <li><a href="#write-the-weekly-file" id="toc-write-the-weekly-file" class="nav-link" data-scroll-target="#write-the-weekly-file">4. Write the weekly file</a></li>
-  <li><a href="#combine-every-week-into-one-database" id="toc-combine-every-week-into-one-database" class="nav-link" data-scroll-target="#combine-every-week-into-one-database">5. Combine every week into one database</a></li>
+  <li><a href="#step-1-apply-the-business-rules-first" id="toc-step-1-apply-the-business-rules-first" class="nav-link" data-scroll-target="#step-1-apply-the-business-rules-first">Step 1 — Apply the business rules first</a></li>
+  <li><a href="#step-2-only-pack-things-that-are-allowed-to-go-together" id="toc-step-2-only-pack-things-that-are-allowed-to-go-together" class="nav-link" data-scroll-target="#step-2-only-pack-things-that-are-allowed-to-go-together">Step 2 — Only pack things that are allowed to go together</a></li>
+  <li><a href="#step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" id="toc-step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" class="nav-link" data-scroll-target="#step-3-fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 — Fill each batch as full as possible (the interesting bit)</a></li>
+  <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example">A worked example</a></li>
   </ul></li>
-  <li><a href="#keeping-the-data-honest" id="toc-keeping-the-data-honest" class="nav-link" data-scroll-target="#keeping-the-data-honest">Keeping the data honest</a></li>
   <li><a href="#challenges-and-what-i-learned" id="toc-challenges-and-what-i-learned" class="nav-link" data-scroll-target="#challenges-and-what-i-learned">Challenges and what I learned</a></li>
   <li><a href="#the-outcome" id="toc-the-outcome" class="nav-link" data-scroll-target="#the-outcome">The outcome</a></li>
   </ul>
@@ -179,17 +172,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Building a Weekly Data Pipeline for Sales &amp; Operations Planning</h1>
+<h1 class="title">Automating Batch Consolidation with Bin-Packing in R</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Project</div>
-    <div class="quarto-category">Data Engineering</div>
     <div class="quarto-category">R</div>
+    <div class="quarto-category">Optimisation</div>
   </div>
   </div>
 
 <div>
   <div class="description">
-    How I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.
+    An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds.
   </div>
 </div>
 
@@ -206,7 +199,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 1, 2025</p>
+      <p class="date">December 1, 2025</p>
     </div>
   </div>
   
@@ -224,159 +217,113 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>The figures, customers and file contents shown in this project are <strong>not</strong> included here — this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.</p>
+<p>This is a public write-up of a work project, so the real stock data has been kept private. The numbers in the worked example below are made-up illustrations, not real figures.</p>
 </div>
 </div>
 </div>
-<section id="the-problem-too-many-files-not-enough-time" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-too-many-files-not-enough-time">The problem: too many files, not enough time</h2>
-<p>While working on the <strong>Sales &amp; Operations Planning (S&amp;OP)</strong> side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed <em>one</em> clean, consolidated view of the business — how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially — across several production plants.</p>
-<p>The catch was that none of this data lived in one place. Each plant exported its own files, in its own format, from its own system:</p>
-<ul>
-<li><strong>Stock on Hand (SOH)</strong> came out as Excel workbooks.</li>
-<li><strong>Dispatch</strong> and <strong>Open Sales</strong> came out as CSVs, each with a different number of junk header rows to skip.</li>
-<li><strong>Production</strong> and <strong>Forecast</strong> lived in large master workbooks (including an <code>.xlsb</code> binary file).</li>
-<li><strong>Finance</strong> came as yet another set of workbooks with their own column names.</li>
-</ul>
-<p>Every week someone had to open a dozen files, clean them by hand, line up the columns, paste them together, and hope nothing was mistyped along the way. It was slow, easy to get wrong, and impossible to audit.</p>
-<p>I wanted to replace that with something I could run in a couple of clicks: <strong>pick a week, get one clean dataset.</strong></p>
+<section id="the-problem-a-weekly-packing-puzzle-done-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-a-weekly-packing-puzzle-done-by-hand">The problem: a weekly packing puzzle done by hand</h2>
+<p>An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock — many rows of items, each with a quantity — and had to <strong>consolidate them into batches</strong>. A batch normally holds up to <strong>36 items</strong> (a handful of special items, kept in a separate list, allow <strong>72</strong>).</p>
+<p>The catch is that you can’t just throw anything together. A batch can only combine rows that share the <strong>same item type</strong> <em>and</em> come from the <strong>same client and establishment (dispatch location)</strong>. And the goal isn’t just to make batches — it’s to make <strong>good</strong> batches: fill each one as close to full as possible so you’re left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what’s left over, not what fills a batch.</p>
+<p>Doing this well, by hand, took about <strong>30 minutes every week</strong> — and it was easy to end up with more loose batches than necessary.</p>
 </section>
 <section id="what-i-built" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-built">What I built</h2>
-<p>The solution is a small but complete data pipeline written in <strong>R</strong> (using the <code>tidyverse</code>, <code>readxl</code>, <code>readr</code> and <code>openxlsx</code>). At a high level it does four things:</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    A[Raw weekly exports&lt;br/&gt;SOH · Dispatch · Production&lt;br/&gt;Sales · Finance · Forecast] --&gt; B{{Master Code&lt;br/&gt;pick Year + Week}}
-    B --&gt; C[Clean each source&lt;br/&gt;+ join on a common Key]
-    C --&gt; D[One weekly file&lt;br/&gt;wWW_YYYY.xlsx]
-    D --&gt; E[(Combined database&lt;br/&gt;all weeks · for BI reports)]
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
+<p>A single R script. She drops the week’s stock export into a <code>Database</code> folder, runs the script, and gets back an Excel file where <strong>every row is tagged with a batch number</strong> (<code>Group</code>) — packed optimally. That’s it. The 30-minute puzzle became a few seconds.</p>
+<p>Under the hood, this is a classic <strong>bin-packing problem</strong>, and I solved each batch’s fill with <strong>dynamic programming</strong> so the result is genuinely optimal, not just a rough guess.</p>
+</section>
+<section id="how-it-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-it-works">How it works</h2>
+<section id="step-1-apply-the-business-rules-first" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-apply-the-business-rules-first">Step 1 — Apply the business rules first</h3>
+<p>Before any packing, the script cleans and filters the data: it drops items that aren’t ready to ship (still pending a temperature change), applies a small cost-centre correction, and loads the special “list of 72” that gets the larger batch size.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"Database/Data.xlsx"</span>, <span class="at">skip =</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(<span class="st">`</span><span class="at">Temperature Change Due</span><span class="st">`</span>)) <span class="sc">%&gt;%</span>      <span class="co"># only ship-ready stock</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Cost Centre</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">if_else</span>(Client <span class="sc">==</span> <span class="st">"DVP"</span>, <span class="st">"822"</span>, <span class="st">`</span><span class="at">Cost Centre</span><span class="st">`</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>list_72 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"Database/List of 72.xlsx"</span>)   <span class="co"># items that pack up to 72</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-2-only-pack-things-that-are-allowed-to-go-together" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-only-pack-things-that-are-allowed-to-go-together">Step 2 — Only pack things that are allowed to go together</h3>
+<p>The script finds every unique combination of <strong>(Client, Establishment, Product)</strong> and treats each one as its own independent packing problem. That guarantees a batch never mixes item types or dispatch locations, and it also keeps each sub-problem small enough to solve exactly.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>keys <span class="ot">&lt;-</span> <span class="fu">unique</span>(df[, <span class="fu">c</span>(<span class="st">"Client"</span>, <span class="st">"Estab"</span>, <span class="st">"Product"</span>)])</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(keys))) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...pack just the rows matching this Client + Estab + Product...</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  bs <span class="ot">&lt;-</span> <span class="cf">if</span> (prod_val <span class="sc">%in%</span> list_72) <span class="dv">72</span> <span class="cf">else</span> <span class="dv">36</span>   <span class="co"># special items get the bigger cap</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 — Fill each batch as full as possible (the interesting bit)</h3>
+<p>Within a group, the script repeatedly:</p>
 <ol type="1">
-<li><strong>Choose a week.</strong> I set the target year and week at the top of the script.</li>
-<li><strong>Clean every source</strong> into the same tidy shape.</li>
-<li><strong>Join everything together</strong> on a single common key, then write out <strong>one consolidated Excel file</strong> for that week.</li>
-<li><strong>Stack every weekly file</strong> into one big historical database that feeds reporting and dashboards.</li>
+<li>picks the <strong>largest remaining item</strong> as the “anchor” of a new batch, then</li>
+<li>finds the <strong>best combination of the other items</strong> that fits in the space left, getting as close to the cap as possible.</li>
 </ol>
+<p>That second step is a subset-sum solved with dynamic programming — it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>best_subset_under <span class="ot">&lt;-</span> <span class="cf">function</span>(qty, <span class="at">cap =</span> <span class="dv">36</span>) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  ord  <span class="ot">&lt;-</span> <span class="fu">order</span>(qty, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  qty2 <span class="ot">&lt;-</span> qty[ord]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  dp <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">FALSE</span>, cap <span class="sc">+</span> <span class="dv">1</span>); dp[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">TRUE</span>   <span class="co"># dp[s] = "can we exactly reach total s?"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(qty2)) {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    qi <span class="ot">&lt;-</span> qty2[i]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(qi) <span class="sc">||</span> qi <span class="sc">&lt;=</span> <span class="dv">0</span> <span class="sc">||</span> qi <span class="sc">&gt;</span> cap) <span class="cf">next</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq</span>(cap, qi, <span class="at">by =</span> <span class="sc">-</span><span class="dv">1</span>)) {</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="sc">!</span>dp[s <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">&amp;&amp;</span> dp[(s <span class="sc">-</span> qi) <span class="sc">+</span> <span class="dv">1</span>]) { dp[s <span class="sc">+</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">TRUE</span>; ... }</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  target <span class="ot">&lt;-</span> <span class="cf">if</span> (dp[cap <span class="sc">+</span> <span class="dv">1</span>]) cap <span class="cf">else</span> <span class="fu">max</span>(<span class="fu">which</span>(dp) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">0</span>)  <span class="co"># best fill &lt;= cap</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...walk back through the table to recover which items made up `target`...</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain — exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.</p>
 </section>
-<section id="how-the-data-is-organised" class="level2">
-<h2 class="anchored" data-anchor-id="how-the-data-is-organised">How the data is organised</h2>
-<p>The whole thing is built around a simple, predictable folder structure. Each week’s raw exports live in their own folder, named by year and week number:</p>
-<pre class="text"><code>Database/
-  2025/
-    Week_47/
-      Corowa - Dispatch.csv
-      Corowa - Open Sales.csv
-      Corowa_Laverton - SOH.xlsx
-      Laverton - Finance.xlsx
-      YTD Sales.xlsx
-      ...
-    Week_48/ ...
-  2026/
-    Week_01/ ...
-
-Complete_file/          &lt;- one cleaned output per week
-  w47_2025.xlsx
-  w01_2026.xlsx
-  ...</code></pre>
-<p>Because the layout is always the same, the code never has to guess where anything is — it just needs to know <em>which week</em> I want. That predictability is what makes the pipeline repeatable.</p>
+<section id="a-worked-example" class="level3">
+<h3 class="anchored" data-anchor-id="a-worked-example">A worked example</h3>
+<p>Say one item type, at one location, has these quantities waiting to ship, into batches of 36:</p>
+<blockquote class="blockquote">
+<p><strong>26, 15, 12, 10, 8, 3, 1</strong></p>
+</blockquote>
+<p>The engine produces:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Batch</th>
+<th>Items packed</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>26 + 10</td>
+<td><strong>36</strong> ✅ full</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>15 + 12 + 8 + 1</td>
+<td><strong>36</strong> ✅ full</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>3</td>
+<td>3 — small leftover</td>
+</tr>
+</tbody>
+</table>
+<p>Two perfectly full batches and a single small remainder — instead of several awkward, half-filled ones.</p>
 </section>
-<section id="the-core-idea-one-key-to-join-everything" class="level2">
-<h2 class="anchored" data-anchor-id="the-core-idea-one-key-to-join-everything">The core idea: one key to join everything</h2>
-<p>The trick that makes all these different files line up is a <strong>composite key</strong>. The same product (“Item”) exists at more than one plant (“Location”), so neither one alone is unique. By combining them, every row in every source gets a single shared key I can join on:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One master list of every Item, expanded across every Location,</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># so each source can be matched back to it.</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Locations <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Corowa"</span>, <span class="st">"Laverton"</span>, <span class="st">"Port_Wakefield"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>foundation_expanded <span class="ot">&lt;-</span> foundation <span class="sc">%&gt;%</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">crossing</span>(<span class="at">Location =</span> Locations) <span class="sc">%&gt;%</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Key =</span> <span class="fu">paste0</span>(Item, Location))   <span class="co"># e.g. "10234Corowa"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Every other dataset builds the <em>same</em> <code>Key</code>, so no matter how messy the original export was, it snaps neatly onto this backbone.</p>
-</section>
-<section id="walking-through-the-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="walking-through-the-pipeline">Walking through the pipeline</h2>
-<section id="pick-the-week" class="level3">
-<h3 class="anchored" data-anchor-id="pick-the-week">1. Pick the week</h3>
-<p>Everything downstream keys off two variables at the very top. In production I can either hard-code them or let them default to the current week:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Year = as.numeric(format(Sys.Date(), "%Y"))</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Week = as.numeric(format(Sys.Date(), "%V")) - 1</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>Year   <span class="ot">=</span> <span class="dv">2026</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Week   <span class="ot">=</span> <span class="dv">3</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>Week_2d   <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Week)   <span class="co"># -&gt; "03"</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>Year_Week <span class="ot">=</span> <span class="fu">paste0</span>(Year, Week_2d)   <span class="co"># -&gt; "202603"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="clean-each-source-into-the-same-shape" class="level3">
-<h3 class="anchored" data-anchor-id="clean-each-source-into-the-same-shape">2. Clean each source into the same shape</h3>
-<p>Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the <code>Key</code>. Dispatch is a good example — the raw CSV becomes three tidy columns:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>corowa_dispatch <span class="ot">&lt;-</span> corowa_dispatch <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ItemKey, DeliveryWeight) <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Item =</span> ItemKey, <span class="at">Dispatch =</span> DeliveryWeight) <span class="sc">%&gt;%</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Item) <span class="sc">%&gt;%</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Dispatch_corowa =</span> <span class="fu">sum</span>(Dispatch, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Key =</span> <span class="fu">paste0</span>(Item, <span class="st">"Corowa"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The same pattern is repeated for stock, production, forecast, finance and sales — each ending up as a small table keyed by <code>Key</code>. Handling each source’s quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn’t silently fail.</p>
-</section>
-<section id="join-it-all-into-one-table" class="level3">
-<h3 class="anchored" data-anchor-id="join-it-all-into-one-table">3. Join it all into one table</h3>
-<p>With every source reduced to the same tidy shape, assembling the master table is just a chain of left joins onto the foundation backbone:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>merged <span class="ot">&lt;-</span> foundation_expanded <span class="sc">%&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(corowa_dispatch_expanded,   <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(laverton_dispatch_expanded, <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(soh_expanded,               <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(production_expanded,        <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(forecast_expanded,          <span class="at">by =</span> <span class="st">"Key"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(finance_expanded,           <span class="at">by =</span> <span class="st">"Key"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Because each plant contributes its own column (<code>Dispatch_corowa</code>, <code>Dispatch_laverton</code>, …), I then <strong>coalesce</strong> them back into a single tidy column and replace the gaps with zero:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>final <span class="ot">&lt;-</span> merged <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Dispatch =</span> <span class="fu">coalesce</span>(Dispatch_corowa, Dispatch_laverton)) <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">Dispatch =</span> <span class="dv">0</span>, <span class="at">SOH =</span> <span class="dv">0</span>, <span class="at">Production =</span> <span class="dv">0</span>, <span class="st">`</span><span class="at">YTD Sales</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="write-the-weekly-file" class="level3">
-<h3 class="anchored" data-anchor-id="write-the-weekly-file">4. Write the weekly file</h3>
-<p>Finally the consolidated table is stamped with the year/week and written to a predictably named file, so the output for any week is always easy to find:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Complete_file/w"</span>, Week_2d, <span class="st">"_"</span>, Year, <span class="st">".xlsx"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(complete_data, <span class="at">file =</span> file_name, <span class="at">sheetName =</span> <span class="st">"S&amp;OP Stock Hand"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="combine-every-week-into-one-database" class="level3">
-<h3 class="anchored" data-anchor-id="combine-every-week-into-one-database">5. Combine every week into one database</h3>
-<p>A separate short script scans the <code>Complete_file/</code> folder, reads every weekly output that matches the <code>wWW_YYYY.xlsx</code> naming pattern, and stacks them into a single historical database that BI reports can be built on top of:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"complete_file"</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pattern =</span> <span class="st">"^w</span><span class="sc">\\</span><span class="st">d{2}_</span><span class="sc">\\</span><span class="st">d{4}</span><span class="sc">\\</span><span class="st">.xlsx$"</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>final_data <span class="ot">&lt;-</span> files <span class="sc">%&gt;%</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="sc">~</span> <span class="fu">read_excel</span>(.x))</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(final_data, <span class="at">file =</span> <span class="st">"S&amp;OP Stock File - Database.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
-<section id="keeping-the-data-honest" class="level2">
-<h2 class="anchored" data-anchor-id="keeping-the-data-honest">Keeping the data honest</h2>
-<p>One extra piece I’m proud of is a small <strong>quality-control check</strong>. New product codes appear in the sales and production exports all the time, and if one isn’t in the master item list yet, it would silently drop out of the report. So I wrote a helper that compares every incoming item against the master list and writes out anything it <em>doesn’t</em> recognise:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>missing_items <span class="ot">&lt;-</span> opensales_merging <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(foundation, <span class="at">by =</span> <span class="st">"Item"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Item, <span class="st">`</span><span class="at">Item Description</span><span class="st">`</span>, <span class="st">`</span><span class="at">Cost Centre</span><span class="st">`</span>, Origin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>That list gets exported each run, so gaps get caught and fixed instead of quietly corrupting the numbers.</p>
 </section>
 <section id="challenges-and-what-i-learned" class="level2">
 <h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
 <ul>
-<li><strong>Real-world data is never tidy.</strong> Most of the effort went into the unglamorous work of reconciling inconsistent formats — different header rows, mismatched column names, CSV vs.&nbsp;Excel vs.&nbsp;binary <code>.xlsb</code>, and item codes stored as numbers in one file and text in another.</li>
-<li><strong>Design for repeatability.</strong> Committing to one folder convention and one join key turned a fragile manual process into something I could re-run for any week with a two-line change.</li>
-<li><strong>Fail loudly, not silently.</strong> The missing-items check taught me that in data work, the dangerous errors aren’t the ones that crash — they’re the ones that quietly produce a plausible-but-wrong number.</li>
+<li><strong>Bin-packing is hard in general</strong> (NP-hard), so a brute-force search over everything wouldn’t scale. Splitting the data by the grouping rules first shrinks it into many <em>small</em> problems, each of which DP can solve exactly and instantly.</li>
+<li><strong>The greedy-only trap.</strong> Just stuffing the biggest items in first (a pure greedy approach) leaves gaps. Pairing a greedy anchor with an exact subset-sum fill gets the best of both: speed <em>and</em> full batches.</li>
+<li><strong>Edge cases matter in operations.</strong> Oversized rows, missing quantities, and type mismatches between the data and the “list of 72” all had to be handled, or a single odd row would break the run.</li>
 </ul>
 </section>
 <section id="the-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It’s scalable across weeks, years and plants, and — just as importantly — it’s <strong>auditable</strong>: anyone can see exactly how each number was built.</p>
-<p>It’s a small project, but it’s a good example of the kind of work I enjoy: taking a messy, real operational problem and turning it into something clean, reliable and reusable.</p>
+<p>A weekly 30-minute manual puzzle became a one-click, few-seconds job — and the batches it produces are more consistently full than hand-packing achieved. It’s a small script, but it’s a good example of turning a real operational headache into a clean, optimal, repeatable process.</p>
 
 
 </section>

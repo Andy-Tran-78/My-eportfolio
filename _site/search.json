@@ -1,5 +1,47 @@
 [
   {
+    "objectID": "posts/data_consolidation_jbs/index.html",
+    "href": "posts/data_consolidation_jbs/index.html",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "",
+    "text": "This is a public write-up of a work project, so the real stock data has been kept private. The numbers in the worked example below are made-up illustrations, not real figures."
+  },
+  {
+    "objectID": "posts/data_consolidation_jbs/index.html#the-problem-a-weekly-packing-puzzle-done-by-hand",
+    "href": "posts/data_consolidation_jbs/index.html#the-problem-a-weekly-packing-puzzle-done-by-hand",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "The problem: a weekly packing puzzle done by hand",
+    "text": "The problem: a weekly packing puzzle done by hand\nAn inventory controller on the Logistics team had a recurring task. Every week she received a list of stock — many rows of items, each with a quantity — and had to consolidate them into batches. A batch normally holds up to 36 items (a handful of special items, kept in a separate list, allow 72).\nThe catch is that you can’t just throw anything together. A batch can only combine rows that share the same item type and come from the same client and establishment (dispatch location). And the goal isn’t just to make batches — it’s to make good batches: fill each one as close to full as possible so you’re left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what’s left over, not what fills a batch.\nDoing this well, by hand, took about 30 minutes every week — and it was easy to end up with more loose batches than necessary."
+  },
+  {
+    "objectID": "posts/data_consolidation_jbs/index.html#what-i-built",
+    "href": "posts/data_consolidation_jbs/index.html#what-i-built",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "What I built",
+    "text": "What I built\nA single R script. She drops the week’s stock export into a Database folder, runs the script, and gets back an Excel file where every row is tagged with a batch number (Group) — packed optimally. That’s it. The 30-minute puzzle became a few seconds.\nUnder the hood, this is a classic bin-packing problem, and I solved each batch’s fill with dynamic programming so the result is genuinely optimal, not just a rough guess."
+  },
+  {
+    "objectID": "posts/data_consolidation_jbs/index.html#how-it-works",
+    "href": "posts/data_consolidation_jbs/index.html#how-it-works",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "How it works",
+    "text": "How it works\n\nStep 1 — Apply the business rules first\nBefore any packing, the script cleans and filters the data: it drops items that aren’t ready to ship (still pending a temperature change), applies a small cost-centre correction, and loads the special “list of 72” that gets the larger batch size.\ndata &lt;- read_excel(\"Database/Data.xlsx\", skip = 4) %&gt;%\n  filter(is.na(`Temperature Change Due`)) %&gt;%      # only ship-ready stock\n  mutate(`Cost Centre` = if_else(Client == \"DVP\", \"822\", `Cost Centre`))\n\nlist_72 &lt;- read_excel(\"Database/List of 72.xlsx\")   # items that pack up to 72\n\n\nStep 2 — Only pack things that are allowed to go together\nThe script finds every unique combination of (Client, Establishment, Product) and treats each one as its own independent packing problem. That guarantees a batch never mixes item types or dispatch locations, and it also keeps each sub-problem small enough to solve exactly.\nkeys &lt;- unique(df[, c(\"Client\", \"Estab\", \"Product\")])\nfor (k in seq_len(nrow(keys))) {\n  # ...pack just the rows matching this Client + Estab + Product...\n  bs &lt;- if (prod_val %in% list_72) 72 else 36   # special items get the bigger cap\n}\n\n\nStep 3 — Fill each batch as full as possible (the interesting bit)\nWithin a group, the script repeatedly:\n\npicks the largest remaining item as the “anchor” of a new batch, then\nfinds the best combination of the other items that fits in the space left, getting as close to the cap as possible.\n\nThat second step is a subset-sum solved with dynamic programming — it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:\nbest_subset_under &lt;- function(qty, cap = 36) {\n  ord  &lt;- order(qty, decreasing = TRUE)\n  qty2 &lt;- qty[ord]\n  dp &lt;- rep(FALSE, cap + 1); dp[1] &lt;- TRUE   # dp[s] = \"can we exactly reach total s?\"\n\n  for (i in seq_along(qty2)) {\n    qi &lt;- qty2[i]\n    if (is.na(qi) || qi &lt;= 0 || qi &gt; cap) next\n    for (s in seq(cap, qi, by = -1)) {\n      if (!dp[s + 1] && dp[(s - qi) + 1]) { dp[s + 1] &lt;- TRUE; ... }\n    }\n  }\n  target &lt;- if (dp[cap + 1]) cap else max(which(dp) - 1, 0)  # best fill &lt;= cap\n  # ...walk back through the table to recover which items made up `target`...\n}\nAnchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain — exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.\n\n\nA worked example\nSay one item type, at one location, has these quantities waiting to ship, into batches of 36:\n\n26, 15, 12, 10, 8, 3, 1\n\nThe engine produces:\n\n\n\nBatch\nItems packed\nTotal\n\n\n\n\nA\n26 + 10\n36 ✅ full\n\n\nB\n15 + 12 + 8 + 1\n36 ✅ full\n\n\nC\n3\n3 — small leftover\n\n\n\nTwo perfectly full batches and a single small remainder — instead of several awkward, half-filled ones."
+  },
+  {
+    "objectID": "posts/data_consolidation_jbs/index.html#challenges-and-what-i-learned",
+    "href": "posts/data_consolidation_jbs/index.html#challenges-and-what-i-learned",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "Challenges and what I learned",
+    "text": "Challenges and what I learned\n\nBin-packing is hard in general (NP-hard), so a brute-force search over everything wouldn’t scale. Splitting the data by the grouping rules first shrinks it into many small problems, each of which DP can solve exactly and instantly.\nThe greedy-only trap. Just stuffing the biggest items in first (a pure greedy approach) leaves gaps. Pairing a greedy anchor with an exact subset-sum fill gets the best of both: speed and full batches.\nEdge cases matter in operations. Oversized rows, missing quantities, and type mismatches between the data and the “list of 72” all had to be handled, or a single odd row would break the run."
+  },
+  {
+    "objectID": "posts/data_consolidation_jbs/index.html#the-outcome",
+    "href": "posts/data_consolidation_jbs/index.html#the-outcome",
+    "title": "Automating Batch Consolidation with Bin-Packing in R",
+    "section": "The outcome",
+    "text": "The outcome\nA weekly 30-minute manual puzzle became a one-click, few-seconds job — and the batches it produces are more consistently full than hand-packing achieved. It’s a small script, but it’s a good example of turning a real operational headache into a clean, optimal, repeatable process."
+  },
+  {
     "objectID": "posts/data_collection_jbs/index.html",
     "href": "posts/data_collection_jbs/index.html",
     "title": "Building a Weekly Data Pipeline for Sales & Operations Planning",
@@ -67,7 +109,7 @@
     "href": "posts/index.html",
     "title": "Andy’s Projects & Posts",
     "section": "",
-    "text": "Welcome! This is a collection of my projects, analyses, and write-ups across data analytics, machine learning, and business intelligence. Each post walks through the problem, methodology, and key findings. So please have a look and feel free to reach out if anything catches your eye.\n\n\n\n\n\n\n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nBuilding a Weekly Data Pipeline for Sales & Operations Planning\n\n\n\nProject\n\nData Engineering\n\nR\n\n\n\nHow I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.\n\n\n\n\n\nNov 1, 2025\n\n8 min\n\n\n\n\n\n\n\n\n\n\n\nThe Hidden Burden of Hospital Infections in Germany\n\n\n\nBlog\n\n\n\nThis article is a blog adapted from the original article Application of a new methodology and R package reveals a high burden of healthcare-associated infections (HAI) in Germany compared to the average in the European Union/European Economic Area, 2011 to 2012\n\n\n\n\n\nOct 8, 2025\n\n8 min\n\n\n\n\nNo matching items"
+    "text": "Welcome! This is a collection of my projects, analyses, and write-ups across data analytics, machine learning, and business intelligence. Each post walks through the problem, methodology, and key findings. So please have a look and feel free to reach out if anything catches your eye.\n\n\n\n\n\n\n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nAutomating Batch Consolidation with Bin-Packing in R\n\n\n\nProject\n\nR\n\nOptimisation\n\n\n\nAn inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds.\n\n\n\n\n\nDec 1, 2025\n\n5 min\n\n\n\n\n\n\n\n\n\n\n\nA Real-Time Yield Dashboard in R Shiny\n\n\n\nProject\n\nShiny\n\nR\n\n\n\nHow I replaced a fragile Excel workflow with an interactive R Shiny app that lets a manager change allocations and watch the yield breakdown update instantly — then download the result as a CSV.\n\n\n\n\n\nNov 15, 2025\n\n6 min\n\n\n\n\n\n\n\n\n\n\n\nBuilding a Weekly Data Pipeline for Sales & Operations Planning\n\n\n\nProject\n\nData Engineering\n\nR\n\n\n\nHow I turned a slow, manual weekly reporting task into one repeatable R pipeline that consolidates stock, dispatch, production, sales and finance data across multiple plants into a single source of truth.\n\n\n\n\n\nNov 1, 2025\n\n8 min\n\n\n\n\n\n\n\n\n\n\n\nThe Hidden Burden of Hospital Infections in Germany\n\n\n\nBlog\n\n\n\nThis article is a blog adapted from the original article Application of a new methodology and R package reveals a high burden of healthcare-associated infections (HAI) in Germany compared to the average in the European Union/European Economic Area, 2011 to 2012\n\n\n\n\n\nOct 8, 2025\n\n8 min\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
