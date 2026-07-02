@@ -11,3 +11,8 @@
 # internal file paths. Kept private on disk, NEVER published to GitHub.
 # The public write-up lives in posts/data_collection_jbs/ instead.
 /posts/Data collection project/
+
+# Confidential source material for the Shiny dashboard project.
+# App code + .RData/.Rhistory that may hold real operational data.
+# Kept private on disk; the public write-up lives in posts/shiny_app_jbs/ instead.
+/posts/Interactive dashboard app/

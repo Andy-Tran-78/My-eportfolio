@@ -77,11 +77,11 @@
     "text": "A results-driven Data Analytics graduate currently pursuing a Master of Business Analytics at Monash University, with hands-on expertise in R, Excel, SQL, Qlik, and Power Query. Skilled in building automated pipelines, interactive dashboards, and structured reporting solutions that turn complex data into clear, actionable insights.\nBeyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP — each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager."
   },
   {
-    "objectID": "about.html#profile",
-    "href": "about.html#profile",
+    "objectID": "about.html#about-me",
+    "href": "about.html#about-me",
     "title": "Andy Tran Resume",
     "section": "",
-    "text": "Data analyst with advanced R Studio and Shiny expertise, hands-on industry experience in data integration and reporting automation, and a strong foundation in economics and business analytics."
+    "text": "A results-driven Data Analytics graduate currently pursuing a Master of Business Analytics at Monash University, with hands-on expertise in R, Excel, SQL, Qlik, and Power Query. Skilled in building automated pipelines, interactive dashboards, and structured reporting solutions that turn complex data into clear, actionable insights.\nBeyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP — each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager."
   },
   {
     "objectID": "about.html#key-skills",
@@ -110,6 +110,13 @@
     "title": "Andy Tran Resume",
     "section": "Projects",
     "text": "Projects\n\nFinance Data Integration & Database Development\nJBS Australia Pork (Rivalea), Commercial Finance Team, under Diogo | Mar 2026 – June 2026\n\nDescription: Developing a centralised finance database using R to consolidate financial and operational data from multiple internal sources into a structured dataset for reporting and analysis.\nObjective: Improve data accessibility and consistency by standardising data structures and reducing manual data preparation for finance reporting and analysis.\n\n\n\nShipment Suggestion & Batch Consolidation Tool\nJBS Australia Pork (Rivalea), Logistic Team, under Bhavika | Jan 2026 – June 2026\n\nDescription: Developed an R-based shipment batching algorithm that consolidates order lines into optimal shipment groups based on product, client, and establishment constraints.\nObjective: Automate shipment grouping logic previously done manually, ensuring consistent batch creation while respecting operational constraints such as Client, Establishment, and Product separation rules.\nResults: Reduced manual shipment planning effort, improved pallet space utilisation, and provided a repeatable and scalable shipment suggestion process for planners.\n\n\n\nDatabase Automation & Reporting Pipeline\nJBS Australia Pork (Rivalea), S&OP Team, under Luiz Wegner | Completed: Dec 2025\n\nDescription: Built an automated data pipeline to extract and consolidate operational data from SQL, Qlik, Pronto, and email-based inputs into a single, report-ready database using R.\nObjective: Reduce manual processing time and improve reliability of weekly S&OP reporting datasets.\nResults: Reduced end-to-end refresh time from ~2 hours (manual process) to ~10 seconds through automation and standardised transformations, enabling faster reporting turnaround and improved data consistency.\n\n\n\nShiny Interactive Dashboard\nJBS Australia Pork (Rivalea), S&OP Team, under Eduardo Ribeiro | Completed: Dec 2025\n\nDescription: Developed an end-to-end Shiny application that ingests Excel inputs and transforms them into a calculated yield database. Implemented an allocation editor (week/location/primal) with validation logic and interactive stacked-bar visualisations showing kg composition by cut option and allocation labels. Added hover tooltips to surface different type of information at segment level.\nObjective: Allow the user to input the data from their local data and edit the data using the interactive dashboard until they are satisfied with the result and download the result to the local file.\nResults: Reduced scenario-testing time from manual spreadsheet edits to near real-time “what-if” analysis, improved transparency of assumptions via drill-down tooltips, and enabled faster weekly planning discussions by making allocation impacts visible across 52 weeks and multiple sites. The dashboard can also be posted online, allowing non-coding users to work with analysis results.\n\n\n\nBlackjack Simulation for R\nMonash University, under Prof. Rob Hyndman | Completed: April 2025\n\nDescription: Worked in group to create a modular Blackjack game package in R, supporting three key modes: Single-player, Multiplayer with unlimited players, and Simulation mode with customizable draw thresholds.\nGitHub"
+  },
+  {
+    "objectID": "about.html#references",
+    "href": "about.html#references",
+    "title": "Andy Tran Resume",
+    "section": "References",
+    "text": "References\nAvailable upon request."
   },
   {
     "objectID": "about.html#contact",
@@ -182,17 +189,45 @@
     "text": "Reference\nZacher, B., Haller, S., Willrich, N., Walter, J., Abu Sin, M., Cassini, A., Plachouras, D., Suetens, C., Behnke, M., Gastmeier, P., Wieler, L. H., & Eckmanns, T. (2019). Application of a new methodology and R package reveals a high burden of healthcare-associated infections (HAI) in Germany compared to the average in the European Union/European Economic Area, 2011 to 2012. Eurosurveillance, 24(46), 1900135. It can be accessible through this link."
   },
   {
-    "objectID": "about.html#about-me",
-    "href": "about.html#about-me",
-    "title": "Andy Tran Resume",
+    "objectID": "posts/shiny_app_jbs/index.html",
+    "href": "posts/shiny_app_jbs/index.html",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
     "section": "",
-    "text": "A results-driven Data Analytics graduate currently pursuing a Master of Business Analytics at Monash University, with hands-on expertise in R, Excel, SQL, Qlik, and Power Query. Skilled in building automated pipelines, interactive dashboards, and structured reporting solutions that turn complex data into clear, actionable insights.\nBeyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP — each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager."
+    "text": "This is a public write-up of a work project, so the real operational figures have been kept private. The screenshots below are from the live app to show the workflow; the underlying data is not shared."
   },
   {
-    "objectID": "about.html#references",
-    "href": "about.html#references",
-    "title": "Andy Tran Resume",
-    "section": "References",
-    "text": "References\nAvailable upon request."
+    "objectID": "posts/shiny_app_jbs/index.html#the-problem-i-just-want-to-change-a-number-and-see-the-graph-move",
+    "href": "posts/shiny_app_jbs/index.html#the-problem-i-just-want-to-change-a-number-and-see-the-graph-move",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
+    "section": "The problem: “I just want to change a number and see the graph move”",
+    "text": "The problem: “I just want to change a number and see the graph move”\nMy manager had a very reasonable ask. He wanted a tool where he could change a few input numbers — the allocation of each cut — and immediately see how it changed the total product coming out, broken down in a detailed graph.\nThat sounds like a job for Excel. But it isn’t, really. Getting Excel to recalculate a stacked, per-week, per-primal breakdown and redraw it cleanly every time you nudge one number is either impossible or a huge, fragile amount of work in formulas and Power Query. The moment the shape of the data changed, it would break.\nSo instead of fighting Excel, I built a small web app in R Shiny that does exactly what he wanted — and put it online so he could use it from a browser, no code required.\n🔗 Live app: andytran78.shinyapps.io/Interactive_dashboard (upload the input workbook to populate it)"
+  },
+  {
+    "objectID": "posts/shiny_app_jbs/index.html#what-it-does",
+    "href": "posts/shiny_app_jbs/index.html#what-it-does",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
+    "section": "What it does",
+    "text": "What it does\nThe manager uploads his Excel workbook, and the app turns it into an interactive dashboard with two tabs.\n\n1. The plot — instant visual feedback\n\n\n\nThe Plot tab: a stacked bar of cut-option KG per week for the selected location and primal, with each cut’s allocation % labelled on the bar.\n\n\nHe picks a Location and a PRIMAL (e.g. Belly), and gets a stacked bar chart of the KG produced by each cut option, week by week, with the allocation percentage printed right on each segment. Hovering a bar reveals the exact product-level breakdown. The five parameters on the left (grade split, grade weights, CCW index) are live too — change one and the whole chart recomputes.\n\n\n2. The allocation editor — change a number, see it flow through\n\n\n\nThe Allocation tab: an editable table of allocation % per cut option, with a live running total, a reset button, and a CSV download.\n\n\nThis is the heart of the tool. He selects a Location, Week and PRIMAL, and gets an editable table of the allocation % for each cut option. He types a new number, and:\n\nthe running total updates instantly (with a target check, so he can see when it adds up correctly);\nthe plot on the other tab recomputes to reflect the new split;\nwhen he’s happy, he clicks Download allocation (CSV) to export the new numbers;\nReset Allocations puts the selected group back to the original values."
+  },
+  {
+    "objectID": "posts/shiny_app_jbs/index.html#how-it-works-under-the-hood",
+    "href": "posts/shiny_app_jbs/index.html#how-it-works-under-the-hood",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
+    "section": "How it works under the hood",
+    "text": "How it works under the hood\n\nThe yield calculation\nEvery pig produces a total sellable weight derived from the grade split and the CCW index. That total is then pushed through each cut’s carcass yield and the manager’s allocation to get the KG for each cut:\n# KG per pig, from the editable parameters\nTotal_KG &lt;- (Grade_A_pct * Grade_A_KG * CCW_index) +\n            (Grade_B_pct * Grade_B_KG * CCW_index)\n\n# KG for each cut = pigs x carcass yield x allocation\nfinal &lt;- final %&gt;%\n  mutate(\n    Total_KG_all = Total_KG * Pigs,\n    cut_kg       = Total_KG_all * `Carcass Yield %` * allocation_pct\n  )\n\n# roll cuts up to primal level for the chart\nprimal_kg &lt;- final %&gt;%\n  group_by(Location, Week, PRIMAL) %&gt;%\n  summarise(primal_kg = sum(cut_kg, na.rm = TRUE), .groups = \"drop\")\n\n\nMaking it reactive\nThe trick that makes it feel “live” is Shiny’s reactivity. The allocations live in a reactive value; the plot and the totals depend on it, so any edit automatically re-triggers everything downstream. The editable table writes each change straight back into that reactive value:\n# only the allocation column is editable\noutput$alloc_tbl &lt;- renderDT({\n  datatable(alloc_edit_slice(), rownames = FALSE,\n            editable = list(target = \"cell\",\n                            disable = list(columns = c(0, 1, 2, 3))))\n})\n\n# when a cell is edited, update the master allocation table\nobserveEvent(input$alloc_tbl_cell_edit, {\n  info &lt;- input$alloc_tbl_cell_edit\n  df_all &lt;- alloc_rv()\n  idx &lt;- which(df_all$Location == input$edit_Location &\n               df_all$Week == as.integer(input$edit_Week) &\n               df_all$PRIMAL == input$edit_PRIMAL &\n               df_all$`Cut Option` == alloc_edit_slice()$`Cut Option`[info$row])\n  df_all$allocation_pct[idx] &lt;- as.numeric(info$value)\n  alloc_rv(df_all)      # &lt;- this one line makes the plot redraw itself\n})\n\n\nLetting him take the result with him\nBecause the whole point was to try scenarios, exporting the edited allocation had to be one click:\noutput$download_alloc &lt;- downloadHandler(\n  filename = function() paste0(\"Allocation_\", Sys.Date(), \".csv\"),\n  content  = function(file) {\n    alloc_rv() %&gt;%\n      select(Location, Week, `Cut Option`, allocation_pct) %&gt;%\n      readr::write_csv(file)\n  }\n)"
+  },
+  {
+    "objectID": "posts/shiny_app_jbs/index.html#challenges-and-what-i-learned",
+    "href": "posts/shiny_app_jbs/index.html#challenges-and-what-i-learned",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
+    "section": "Challenges and what I learned",
+    "text": "Challenges and what I learned\n\nReshaping messy input. The workbook stores allocations in a wide, human-friendly layout; the app reshapes each sheet from wide to long so everything can be joined and computed cleanly.\nTwo allocation scales. People enter allocations as either 0.25 or 25%. I added a small detector so the totals and bar labels behave correctly either way, instead of forcing one convention on the user.\nKeeping edits in sync. The editable table only ever shows one slice, so edits had to be written back to the full dataset by key — not just the visible rows — or the plot would fall out of sync.\nShipping it. Deploying to shinyapps.io meant the manager just needed a link, not R, to use the tool."
+  },
+  {
+    "objectID": "posts/shiny_app_jbs/index.html#the-outcome",
+    "href": "posts/shiny_app_jbs/index.html#the-outcome",
+    "title": "A Real-Time Yield Dashboard in R Shiny",
+    "section": "The outcome",
+    "text": "The outcome\nWhat used to be an impossible-in-Excel request became a live, shareable tool. My manager can now explore “what-if” allocation scenarios in near real time, see the impact across all 52 weeks and every primal, and export the result — turning a manual spreadsheet chore into an interactive decision-support app that a non-coder can drive."
   }
 ]
