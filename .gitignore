@@ -21,3 +21,8 @@
 # Real stock data (Database/) + code and .RData/.Rhistory that may hold it.
 # Kept private on disk; the public write-up lives in posts/data_consolidation_jbs/ instead.
 /posts/Data Consolidation/
+
+# Confidential source material for the Export Shipment project.
+# Real stock/production/open-sales data (Data/), buyer names, results CSV, and
+# .RData/.Rhistory. Kept private; public write-up lives in posts/export_shipment_jbs/ instead.
+/posts/Export Shipment project/

@@ -1,0 +1,152 @@
+---
+title: "Predicting Shipment Weeks with a Stock Simulation in R"
+author: "Tran Dang Huy (Andy)"
+title-block-banner: false
+description: "An inventory controller spent 1–2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble."
+date: 2026-03-01
+categories: [Project, R, Simulation]
+image: cover.svg
+---
+
+::: {.callout-note appearance="simple"}
+This is a public write-up of a work project, so the real stock, production, and customer data has been kept private. The numbers in the worked example below are made-up illustrations.
+:::
+
+## The problem: forecasting shipments by hand, every week
+
+An inventory controller on the Logistics team had one of those tasks that quietly gets worse over time. Every week she had to look at all the open orders and, for each one, work out **which week it could actually ship** — juggling the stock currently on hand, the stock that production would add in the coming weeks, and which orders were urgent.
+
+With a handful of orders that's manageable. But the order book kept growing, and the interactions between orders compounded: shipping one early might starve a more urgent one later. What started as a ~1 hour job crept up to **1–2 hours every week**, and the more orders there were, the easier it was to make a mistake or miss that an order was heading for a late delivery.
+
+So I built a model that does the whole thing automatically: it **simulates stock forward through the year** and, for every order, predicts the week it should ship — while also telling her exactly **which orders are in trouble** and why.
+
+## What it produces
+
+The controller drops the week's data into a `Data` folder and runs the script. Out comes a results file where every order has:
+
+- a **predicted shipment week**;
+- a **status** — *On time*, *Delayed* (with how many weeks late), *Cannot deliver this year*, or a data problem such as *Missing SOH / Production / Code*, *Missing Shipment Period*, or *Invalid Quantity*;
+- the **stock available before and after** that order ships, so the reasoning is transparent.
+
+That status column is the part she values most: instead of discovering a late shipment by accident, the model surfaces every problem order up front.
+
+## The inputs
+
+The model pulls together five sources and reduces them to a common per-product view:
+
+- **Booking data** (export orders) and **open sales orders** (domestic) → combined into one order book;
+- **Production** from both plants → averaged into a **weekly production rate** per product;
+- **Stock on hand** → the **starting stock** per product.
+
+```r
+# Production becomes a weekly *rate* (total over the recent window / number_of_weeks)
+production_expanded <- total_production %>%
+  filter(!is.na(Code)) %>%
+  group_by(Code) %>%
+  summarise(Production = sum(Production, na.rm = TRUE) / number_of_weeks,
+            .groups = "drop")
+
+# Stock on hand is summed per product; non-numeric codes (e.g. "XPLT") are dropped
+# so Code stays a unique key and later joins enrich rows instead of multiplying them.
+stock_on_hand_expanded <- stock_on_hand_new %>%
+  group_by(Code) %>%
+  summarise(SOH = sum(SOH, na.rm = TRUE), .groups = "drop") %>%
+  filter(!is.na(as.numeric(Code)))
+```
+
+## Turning a messy "delivery date" into a week window
+
+Orders don't state their timing consistently. Some say a week (`W10`, `Week 10`, `10`), some give a month or even a range of months (`March`, `Jan–Mar`). The model normalises all of that into a **delivery window** — an earliest and latest week the order is allowed to ship in:
+
+```r
+# A week reference -> that exact week; a month (or month range) -> the ISO weeks
+# spanning the 1st of the earliest month to the last day of the latest month.
+shipment_period_to_weeks <- function(x, yr = year(Sys.Date())) {
+  # ...detect "W10 / Week 10 / 10"  -> start_week = end_week = 10
+  # ...detect month tokens          -> start_week = isoweek(first day),
+  #                                     end_week   = isoweek(last day)
+}
+```
+
+Distinct periods are parsed **once** and joined back on, rather than re-parsing the same text for every order — a small but meaningful speed-up on a large order book. Every order ends up with a `start_week` (earliest it can go) and `end_week` (its deadline).
+
+## The heart of it: simulating stock week by week
+
+The core function runs **one product code at a time** (all its orders together), because orders only compete for the stock of their own product. Starting from the current week, it steps forward week by week. Each week it first tops up stock with that week's production, then decides what to ship:
+
+```r
+for (w in current_week:max_week) {
+  stock <- stock + prod                    # this week's production arrives
+
+  # 1) Ship PRIORITY orders that are due/overdue (end_week <= w), earliest deadline first
+  #    ...ship each if stock >= qty, recording before/after stock and the ship week...
+
+  # 2) If a due priority order still can't be shipped, STOP for this week —
+  #    don't spend stock on anything else; let it accumulate.
+  if (any_priority_still_due_and_unshipped) next
+
+  # 3) Work out how much stock must be RESERVED for future priority orders
+  reserve <- reserve_needed(w, remaining_priority_rows)
+
+  # 4) Ship NON-priority orders, but only from stock ABOVE that reserve
+  #    ...ship each if (stock >= qty) AND (stock - qty >= reserve)...
+
+  if (all_orders_for_this_code_shipped) break
+}
+```
+
+### Protecting priority orders — the clever bit
+
+The subtle part is step 3. It's not enough to ship priority orders when they're due; you have to make sure that *today's* non-priority shipments don't quietly use up stock that a priority order will need later. So before shipping anything non-priority, the model calculates a **reserve**: the amount of current stock that must be held back so every remaining priority order can still be met by its deadline, given the production expected to arrive in the meantime.
+
+```r
+reserve_needed <- function(w, remaining_priority_rows) {
+  pri <- remaining_priority %>% arrange(end_week)      # by deadline
+  cum_qty   <- cumsum(pri$Quantity)                    # cumulative demand by each deadline
+  deadlines <- pri$end_week
+  # demand due by each deadline, minus production that will arrive before then:
+  req <- cum_qty - prod * pmax(0L, deadlines - w)
+  max(0, max(req, na.rm = TRUE))                        # worst-case shortfall = reserve
+}
+```
+
+In plain terms: for each priority deadline it asks *"how much stock do I need right now to cover everything due by then, after counting the production I'll receive before that date?"* — and reserves the largest of those requirements. Non-priority orders can only draw on stock **above** that line. This is what stops a routine order from accidentally making an urgent one late.
+
+### Deciding the status
+
+Once an order's shipment week is known, its status writes itself:
+
+```r
+if (is.na(ship_week))            status <- "Cannot deliver this year"
+else if (ship_week > end_week)   { status <- "Delayed"; delay_weeks <- ship_week - end_week }
+else                             { status <- "On time";  delay_weeks <- 0 }
+```
+
+Orders that never got a shipment week (not enough stock + production all year) are flagged *Cannot deliver*; anything shipping after its deadline is *Delayed* with the exact number of weeks. Separately, orders missing a product code, stock figure, production figure, quantity or period are flagged as data problems **instead of being silently dropped** — every input row comes back in the output with an explanation.
+
+## A worked example
+
+Say one product has **10 units in stock**, produces **4 units/week**, and it's currently **week 10**. Two orders are open:
+
+- **Order A — priority**, 20 units, due **week 12**
+- **Order B — normal**, 6 units, ready from week 10
+
+| Week | Stock after production | What happens |
+|------|------------------------|--------------|
+| 10 | 14 | A not due yet. Reserve for A = 20 − 4×2 = **12**. B needs 6, but 14 − 6 = 8 < 12 → **B waits** to protect A |
+| 11 | 18 | Reserve = 20 − 4×1 = **16**. 18 − 6 = 12 < 16 → **B still waits** |
+| 12 | 22 | A is due → **ship A (on time)**, stock → 2. Reserve now 0, but B needs 6 > 2 → B waits |
+| 13 | 6 | **Ship B**, stock → 0 |
+
+Order B *could* physically have shipped in week 10 if we were careless — but doing so would have made the priority order A late. The reserve logic holds B back until A is safe. If B's own deadline had been week 11, the model would have shipped it in week 13 and flagged it **Delayed by 2 weeks** — exactly the kind of early warning the controller needs.
+
+## Challenges and what I learned
+
+- **Feasibility, not just greed.** A naive "ship whatever's due" rule quietly breaks priority deadlines. The reserve calculation turns the loop from a greedy dispatcher into one that looks ahead and guarantees priority orders stay feasible.
+- **Messy real-world timing.** Delivery periods arrived as weeks, months, and ranges. Normalising them into a start/end week window was essential before any simulation could run.
+- **Never drop a row silently.** In an operational tool, an order that vanishes because of a missing code is dangerous. Every row is preserved and labelled, so nothing slips through unnoticed.
+- **Per-product decomposition.** Running the simulation independently per product code keeps each problem small and fast, and mirrors how the stock actually behaves.
+
+## The outcome
+
+A 1–2 hour weekly forecast — one that got harder as the order book grew — became an automated run that predicts a shipment week for every order, keeps urgent orders protected, and hands the controller a ready-made list of the orders that need her attention. It's the most logically involved project I've built, and the one where getting the *rules* right mattered just as much as getting the code right.

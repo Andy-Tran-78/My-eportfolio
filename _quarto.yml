@@ -9,6 +9,7 @@ project:
     - posts/data_collection_jbs/index.qmd
     - posts/shiny_app_jbs/index.qmd
     - posts/data_consolidation_jbs/index.qmd
+    - posts/export_shipment_jbs/index.qmd
 
 
 website:
