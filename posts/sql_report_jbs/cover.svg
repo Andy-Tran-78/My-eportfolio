@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#f4f6f7"/>
+  <rect width="1200" height="140" fill="#2c3e50"/>
+  <text x="60" y="70" fill="#ffffff" font-size="44" font-weight="700">SQL to Self-Service Report</text>
+  <text x="60" y="112" fill="#18bc9c" font-size="23" font-weight="500">Turning a validated query into a parameterised report anyone can run</text>
+
+  <!-- Left: SQL -->
+  <rect x="55" y="215" width="250" height="185" rx="12" fill="#1e2b38"/>
+  <text x="75" y="248" fill="#7fd8c6" font-size="15" font-family="Consolas, monospace">declare @Start date</text>
+  <text x="75" y="272" fill="#7fd8c6" font-size="15" font-family="Consolas, monospace">declare @End   date</text>
+  <text x="75" y="300" fill="#e0e0e0" font-size="15" font-family="Consolas, monospace">select ...</text>
+  <text x="75" y="322" fill="#e0e0e0" font-size="15" font-family="Consolas, monospace">from  Orders o</text>
+  <text x="75" y="344" fill="#e0e0e0" font-size="15" font-family="Consolas, monospace">join  Lines  l</text>
+  <text x="75" y="372" fill="#c9a0dc" font-size="15" font-family="Consolas, monospace">where SaleDate</text>
+  <text x="75" y="392" fill="#c9a0dc" font-size="15" font-family="Consolas, monospace">  between @Start..</text>
+  <text x="180" y="205" fill="#2c3e50" font-size="16" font-weight="700" text-anchor="middle">Validated SQL</text>
+
+  <!-- Arrow -->
+  <g stroke="#18bc9c" stroke-width="6" fill="#18bc9c">
+    <line x1="315" y1="308" x2="365" y2="308"/>
+    <polygon points="365,291 395,308 365,325"/>
+  </g>
+
+  <!-- Middle: report tool -->
+  <rect x="410" y="195" width="330" height="225" rx="12" fill="#ffffff" stroke="#2c3e50" stroke-width="3"/>
+  <text x="575" y="222" fill="#2c3e50" font-size="17" font-weight="700" text-anchor="middle">ERP Report Tool</text>
+  <line x1="430" y1="235" x2="720" y2="235" stroke="#e0e4e6" stroke-width="2"/>
+
+  <text x="430" y="262" fill="#12987d" font-size="15" font-weight="700">DECLARE  &#8594;  Parameters</text>
+  <g>
+    <rect x="430" y="274" width="135" height="26" rx="5" fill="#eafaf5" stroke="#7fd8c6"/><text x="440" y="292" fill="#0b5c4c" font-size="13">Start / End date</text>
+    <rect x="575" y="274" width="60" height="26" rx="5" fill="#eafaf5" stroke="#7fd8c6"/><text x="585" y="292" fill="#0b5c4c" font-size="13">Plant</text>
+    <rect x="430" y="306" width="90" height="26" rx="5" fill="#eafaf5" stroke="#7fd8c6"/><text x="440" y="324" fill="#0b5c4c" font-size="13">Customer</text>
+    <rect x="530" y="306" width="90" height="26" rx="5" fill="#eafaf5" stroke="#7fd8c6"/><text x="540" y="324" fill="#0b5c4c" font-size="13">Product</text>
+  </g>
+  <text x="430" y="360" fill="#12987d" font-size="15" font-weight="700">Result columns &#8594; grid</text>
+  <g fill="#607d8b" font-size="12">
+    <rect x="430" y="372" width="290" height="18" fill="#f4f6f7"/>
+    <rect x="430" y="392" width="290" height="16" fill="#fbfcfc"/>
+    <text x="436" y="385">Product | Buyer | Qty | Sale Value (AUD) | ...</text>
+  </g>
+
+  <!-- Arrow -->
+  <g stroke="#18bc9c" stroke-width="6" fill="#18bc9c">
+    <line x1="750" y1="308" x2="800" y2="308"/>
+    <polygon points="800,291 830,308 800,325"/>
+  </g>
+
+  <!-- Right: self service -->
+  <rect x="845" y="215" width="300" height="185" rx="12" fill="#2c3e50"/>
+  <text x="995" y="250" fill="#ffffff" font-size="19" font-weight="700" text-anchor="middle">Self-service report</text>
+  <g>
+    <rect x="870" y="270" width="250" height="24" fill="#3b4d5e"/>
+    <rect x="870" y="296" width="250" height="20" fill="#34495e"/>
+    <rect x="870" y="318" width="250" height="20" fill="#3b4d5e"/>
+    <rect x="870" y="340" width="250" height="20" fill="#34495e"/>
+  </g>
+  <text x="995" y="384" fill="#18bc9c" font-size="14" text-anchor="middle">staff filter &amp; run it themselves</text>
+
+  <text x="60" y="470" fill="#607d8b" font-size="20" font-weight="600">Next step: a UI so anyone at JBS can look up this report without touching SQL</text>
+  <text x="60" y="575" fill="#95a5a6" font-size="18">Backed by a verified data dictionary · FX &amp; unit conversions · documented assumptions</text>
+</svg>
