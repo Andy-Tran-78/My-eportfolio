@@ -8,7 +8,7 @@
 
 <meta name="author" content="Tran Dang Huy (Andy)">
 <meta name="dcterms.date" content="2026-05-01">
-<meta name="description" content="My manager’s financial forecast lived in a 30MB Excel file that froze every time he touched it — useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality.">
+<meta name="description" content="My manager’s financial forecast lived in a 30MB Excel file that froze every time he touched it - useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality.">
 
 <title>Rebuilding a 30MB Excel Forecast Model as an R Pipeline – About me</title>
 <style>
@@ -179,7 +179,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    My manager’s financial forecast lived in a 30MB Excel file that froze every time he touched it — useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality.
+    My manager’s financial forecast lived in a 30MB Excel file that froze every time he touched it - useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality.
   </div>
 </div>
 
@@ -214,19 +214,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>This is a public write-up of a Finance Team project, so all real financial data has been kept private. The code snippets below are simplified and redacted to show the <em>logic</em> only — no company figures, customers, or data are shared.</p>
+<p>This is a public write-up of a Finance Team project, so all real financial data has been kept private. The code snippets below are simplified and redacted to show the <em>logic</em> only - no company figures, customers, or data are shared.</p>
 </div>
 </div>
 </div>
 <p>🔗 <strong>The full code (with all data excluded) is on GitHub:</strong> <a href="https://github.com/Jakey-vn/ETC5543_Project">Jakey-vn/ETC5543_Project</a></p>
 <section id="the-problem-a-spreadsheet-too-heavy-to-use" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-a-spreadsheet-too-heavy-to-use">The problem: a spreadsheet too heavy to use</h2>
-<p>My manager on the Commercial Finance team had built a financial <strong>forecast model</strong> in Excel. It worked, but it had grown into a <strong>~30MB monster</strong>. Every time he changed an input, the file took an age to recalculate and open — and in a live meeting, where the whole point is to react to questions on the spot, a spreadsheet that freezes for minutes is effectively useless.</p>
-<p>The model itself wasn’t the problem; the <em>tool</em> was. Excel simply wasn’t built to carry that much interconnected calculation. So I rebuilt the whole thing in <strong>R</strong>: a pipeline where you drop the latest data into a folder, run it, and about <strong>five minutes later</strong> you have the complete forecast — as a clean general-ledger (GL) database ready for reporting.</p>
+<p>My manager on the Commercial Finance team had built a financial <strong>forecast model</strong> in Excel. It worked, but it had grown into a <strong>~30MB monster</strong>. Every time he changed an input, the file took an age to recalculate and open - and in a live meeting, where the whole point is to react to questions on the spot, a spreadsheet that freezes for minutes is effectively useless.</p>
+<p>The model itself wasn’t the problem; the <em>tool</em> was. Excel simply wasn’t built to carry that much interconnected calculation. So I rebuilt the whole thing in <strong>R</strong>: a pipeline where you drop the latest data into a folder, run it, and about <strong>five minutes later</strong> you have the complete forecast - as a clean general-ledger (GL) database ready for reporting.</p>
 </section>
 <section id="what-it-produces" class="level2">
 <h2 class="anchored" data-anchor-id="what-it-produces">What it produces</h2>
-<p>The pipeline outputs a single <strong>GL database file</strong> (<code>GL_DB Template.csv</code>) — the forecast broken down into general-ledger lines (revenue and expense) across the business’s four units:</p>
+<p>The pipeline outputs a single <strong>GL database file</strong> (<code>GL_DB Template.csv</code>) - the forecast broken down into general-ledger lines (revenue and expense) across the business’s four units:</p>
 <ol type="1">
 <li>Farming Operations</li>
 <li>Meat Processing (Corowa)</li>
@@ -237,19 +237,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-core-idea-accounts-data-join" class="level2">
 <h2 class="anchored" data-anchor-id="the-core-idea-accounts-data-join">The core idea: accounts + data → join</h2>
-<p>Underneath all the size, the whole model follows <strong>one repeating pattern</strong>. For every kind of value — each revenue stream, then each expense type — I do three things:</p>
+<p>Underneath all the size, the whole model follows <strong>one repeating pattern</strong>. For every kind of value - each revenue stream, then each expense type - I do three things:</p>
 <ol type="1">
-<li><strong>Build the <em>account</em></strong> — the skeleton of <em>where</em> a value belongs: its GL account, cost centre, business unit, floor and customers.</li>
-<li><strong>Build the <em>data</em></strong> — the actual <strong>volume, priced up</strong> into a dollar value, using the right price source for that product type.</li>
-<li><strong>Join account + data</strong> — attach the calculated values onto the correct accounts, producing a block of finished GL rows.</li>
+<li><strong>Build the <em>account</em></strong> - the skeleton of <em>where</em> a value belongs: its GL account, cost centre, business unit, floor and customers.</li>
+<li><strong>Build the <em>data</em></strong> - the actual <strong>volume, priced up</strong> into a dollar value, using the right price source for that product type.</li>
+<li><strong>Join account + data</strong> - attach the calculated values onto the correct accounts, producing a block of finished GL rows.</li>
 </ol>
 <p>Then I stack all those blocks together into the final database. In simplified form, one revenue block looks like this:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) ACCOUNT — the skeleton: which GL account / cost centre / customers this belongs to</span></span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) ACCOUNT - the skeleton: which GL account / cost centre / customers this belongs to</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>account_boxed_meat <span class="ot">&lt;-</span> customer_data <span class="sc">%&gt;%</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(BU <span class="sc">==</span> <span class="st">"2.Meat Processing"</span>, Floor <span class="sc">==</span> <span class="st">"Boxed Meat"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">GL Account</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"400000"</span>, <span class="st">`</span><span class="at">Cc Key</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"10501816"</span>)   <span class="co"># external sales</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) DATA — the priced volume: weight x the correct price source for this floor</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) DATA - the priced volume: weight x the correct price source for this floor</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>value_boxed_meat <span class="ot">&lt;-</span> volume_boxed_meat_raw <span class="sc">%&gt;%</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(item_price_data, <span class="at">by =</span> <span class="st">"Item Code"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Value =</span> <span class="st">`</span><span class="at">Total Weight</span><span class="st">`</span> <span class="sc">*</span> Price) <span class="sc">%&gt;%</span></span>
@@ -259,23 +259,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) JOIN account + data -&gt; finished GL rows</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>gl_boxed_meat <span class="ot">&lt;-</span> account_boxed_meat <span class="sc">%&gt;%</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(value_boxed_meat, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Abattoir"</span>, <span class="st">"Month"</span>, <span class="st">"Item Code"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Different floors pull their price from different places — carcass price, kill fee, bone fee, item price, and so on — but the <em>shape</em> of every block is the same. Once that pattern clicks, a 4,700-line script stops being scary: it’s the same idea repeated carefully, many times.</p>
+<p>Different floors pull their price from different places - carcass price, kill fee, bone fee, item price, and so on - but the <em>shape</em> of every block is the same. Once that pattern clicks, a 4,700-line script stops being scary: it’s the same idea repeated carefully, many times.</p>
 </section>
 <section id="why-it-got-big-the-special-conditions" class="level2">
 <h2 class="anchored" data-anchor-id="why-it-got-big-the-special-conditions">Why it got big: the special conditions</h2>
-<p>If it were just “volume × price” everywhere, this would be a small script. The real complexity — and the reason it ballooned — is that <strong>almost every account has its own special rule</strong>, dictated by how the business actually operates. A few real examples:</p>
+<p>If it were just “volume × price” everywhere, this would be a small script. The real complexity - and the reason it ballooned - is that <strong>almost every account has its own special rule</strong>, dictated by how the business actually operates. A few real examples:</p>
 <ul>
-<li><strong>Intercompany vs external.</strong> The same product can be an external sale (account <code>400000</code>) or an internal transfer between units (<code>400028</code>). Laverton, for instance, consolidates its edible offal under Corowa’s name to sell it — so that volume has to be booked as intercompany, not external.</li>
-<li><strong>The Lineage discount.</strong> Laverton ships some products through a cold store (Lineage) that charges a handling fee, so a <strong>$0.51/kg discount</strong> is subtracted from those values — which is the whole reason Corowa and Laverton offal have to be calculated <em>separately</em>.</li>
+<li><strong>Intercompany vs external.</strong> The same product can be an external sale (account <code>400000</code>) or an internal transfer between units (<code>400028</code>). Laverton, for instance, consolidates its edible offal under Corowa’s name to sell it - so that volume has to be booked as intercompany, not external.</li>
+<li><strong>The Lineage discount.</strong> Laverton ships some products through a cold store (Lineage) that charges a handling fee, so a <strong>$0.51/kg discount</strong> is subtracted from those values - which is the whole reason Corowa and Laverton offal have to be calculated <em>separately</em>.</li>
 <li><strong>Special contracts.</strong> Customers like Woolworths and DRJ have bespoke packaging fees and margin percentages, applied to a bone-out weight that first has to be adjusted by hot-to-cold and cold-to-meat <strong>yield factors</strong>.</li>
 <li><strong>Price fallbacks and temporary fixes.</strong> Packaging prices are looked up at one “variant” and fall back to another if missing; where a price is genuinely absent in the source, a temporary fixed rate is applied until the data is corrected.</li>
 </ul>
-<p>Each of these is small on its own. Together, across four business units and dozens of accounts, they’re what make the model genuinely complicated — and exactly what Excel had made so fragile.</p>
+<p>Each of these is small on its own. Together, across four business units and dozens of accounts, they’re what make the model genuinely complicated - and exactly what Excel had made so fragile.</p>
 </section>
 <section id="keeping-it-honest-the-gap-check" class="level2">
 <h2 class="anchored" data-anchor-id="keeping-it-honest-the-gap-check">Keeping it honest: the Gap Check</h2>
 <p>A model this size is only trustworthy if you can prove nothing fell through the cracks. So I wrote a second script, <strong><code>Gap_Check.R</code></strong>, that runs after the main pipeline and reconciles <strong>volume in vs volume out</strong>.</p>
-<p>The idea is simple: the total weight going <em>in</em> (from the raw SOP volume source) should equal the total weight coming <em>out</em> (into the priced database) for every category. If they don’t match, something was dropped — and the gap check finds exactly what:</p>
+<p>The idea is simple: the total weight going <em>in</em> (from the raw SOP volume source) should equal the total weight coming <em>out</em> (into the priced database) for every category. If they don’t match, something was dropped - and the gap check finds exactly what:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Volume IN (raw source) vs volume OUT (what reached the database), per category</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Category         =</span> <span class="fu">c</span>(<span class="st">"Corowa - 6 Way"</span>, <span class="st">"Laverton - Commodity FRZ"</span>, <span class="st">"..."</span>),</span>
@@ -283,25 +283,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">DB Weight</span><span class="st">`</span>      <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">db_wt</span>(corowa_6way_out),  <span class="fu">db_wt</span>(lav_commodity_out),  ...)   <span class="co"># out</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># WHICH items are in the input but never got priced into the output — and why</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># WHICH items are in the input but never got priced into the output - and why</span></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>bone_no_price <span class="ot">&lt;-</span> volume_bone_raw <span class="sc">%&gt;%</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(item_price_data, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Item Code"</span> <span class="ot">=</span> <span class="st">"Item Key"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Total Weight</span><span class="st">`</span> <span class="sc">!=</span> <span class="dv">0</span>)     <span class="co"># -&gt; fix: "Add this Item Code to the price sheet"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Using <code>anti_join</code> in both directions, it lists every item that appears <strong>in the input but not the output</strong> (and vice versa), classifies <em>why</em> — missing price, missing storage type, an unmapped code — and prints a <strong>suggested fix</strong> for each one, all into a <code>Gap_Check.xlsx</code> report.</p>
-<p>This turned out to be one of the most valuable parts of the project. On one run the numbers didn’t reconcile: volume out was smaller than volume in. The gap check pinpointed the culprit — some items had been <strong>recorded in the wrong place</strong> in the source data, so they failed the join conditions and silently dropped out. It was a genuine data-entry mistake upstream in the S&amp;OP data; the S&amp;OP team fixed it immediately once the report showed them exactly which items and how much weight were affected. Instead of a quietly-wrong forecast, we had a self-auditing one.</p>
+<p>Using <code>anti_join</code> in both directions, it lists every item that appears <strong>in the input but not the output</strong> (and vice versa), classifies <em>why</em> - missing price, missing storage type, an unmapped code - and prints a <strong>suggested fix</strong> for each one, all into a <code>Gap_Check.xlsx</code> report.</p>
+<p>This turned out to be one of the most valuable parts of the project. On one run the numbers didn’t reconcile: volume out was smaller than volume in. The gap check pinpointed the culprit - some items had been <strong>recorded in the wrong place</strong> in the source data, so they failed the join conditions and silently dropped out. It was a genuine data-entry mistake upstream in the S&amp;OP data; the S&amp;OP team fixed it immediately once the report showed them exactly which items and how much weight were affected. Instead of a quietly-wrong forecast, we had a self-auditing one.</p>
 </section>
 <section id="challenges-and-what-i-learned" class="level2">
 <h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
 <ul>
-<li><strong>Complexity lives in the rules, not the code.</strong> The hard part wasn’t R — it was faithfully translating dozens of real business exceptions (discounts, intercompany flows, special contracts) into consistent, auditable logic.</li>
+<li><strong>Complexity lives in the rules, not the code.</strong> The hard part wasn’t R - it was faithfully translating dozens of real business exceptions (discounts, intercompany flows, special contracts) into consistent, auditable logic.</li>
 <li><strong>A repeatable pattern tames scale.</strong> Committing to the same “account + data + join” structure for every account is what kept 4,700 lines maintainable instead of chaotic.</li>
-<li><strong>Build the auditor alongside the model.</strong> The gap check made the pipeline trustworthy and even improved the upstream data — a reminder that in finance work, being able to <em>prove</em> the number is as important as producing it.</li>
+<li><strong>Build the auditor alongside the model.</strong> The gap check made the pipeline trustworthy and even improved the upstream data - a reminder that in finance work, being able to <em>prove</em> the number is as important as producing it.</li>
 <li><strong>The right tool matters.</strong> The same model that made Excel freeze runs comfortably in R in minutes, because the tool actually fits the size of the problem.</li>
 </ul>
 </section>
 <section id="the-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>A 30MB spreadsheet that was too heavy to use in the meetings it was built for became a <strong>five-minute, data-in-report-out pipeline</strong> — one that produces a full general-ledger forecast across four business units and checks its own data quality on the way. It’s the largest and most intricate project I’ve built, and the one that taught me the most about turning messy real-world business rules into something reliable.</p>
+<p>A 30MB spreadsheet that was too heavy to use in the meetings it was built for became a <strong>five-minute, data-in-report-out pipeline</strong> - one that produces a full general-ledger forecast across four business units and checks its own data quality on the way. It’s the largest and most intricate project I’ve built, and the one that taught me the most about turning messy real-world business rules into something reliable.</p>
 
 
 </section>

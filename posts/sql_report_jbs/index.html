@@ -8,7 +8,7 @@
 
 <meta name="author" content="Tran Dang Huy (Andy)">
 <meta name="dcterms.date" content="2026-06-23">
-<meta name="description" content="I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report — so staff can pull the data themselves with a few filters, no SQL required.">
+<meta name="description" content="I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report - so staff can pull the data themselves with a few filters, no SQL required.">
 
 <title>Turning a SQL Query into a Self-Service Report – About me</title>
 <style>
@@ -154,8 +154,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#the-idea-reports-people-can-run-themselves" id="toc-the-idea-reports-people-can-run-themselves" class="nav-link active" data-scroll-target="#the-idea-reports-people-can-run-themselves">The idea: reports people can run themselves</a></li>
-  <li><a href="#step-1-write-and-validate-the-sql" id="toc-step-1-write-and-validate-the-sql" class="nav-link" data-scroll-target="#step-1-write-and-validate-the-sql">Step 1 — Write and validate the SQL</a></li>
-  <li><a href="#step-2-rebuild-it-as-a-parameterised-report" id="toc-step-2-rebuild-it-as-a-parameterised-report" class="nav-link" data-scroll-target="#step-2-rebuild-it-as-a-parameterised-report">Step 2 — Rebuild it as a parameterised report</a></li>
+  <li><a href="#step-1---write-and-validate-the-sql" id="toc-step-1---write-and-validate-the-sql" class="nav-link" data-scroll-target="#step-1---write-and-validate-the-sql">Step 1 - Write and validate the SQL</a></li>
+  <li><a href="#step-2---rebuild-it-as-a-parameterised-report" id="toc-step-2---rebuild-it-as-a-parameterised-report" class="nav-link" data-scroll-target="#step-2---rebuild-it-as-a-parameterised-report">Step 2 - Rebuild it as a parameterised report</a></li>
   <li><a href="#doing-it-properly-the-engineering-around-the-sql" id="toc-doing-it-properly-the-engineering-around-the-sql" class="nav-link" data-scroll-target="#doing-it-properly-the-engineering-around-the-sql">Doing it properly: the engineering around the SQL</a></li>
   <li><a href="#where-its-heading" id="toc-where-its-heading" class="nav-link" data-scroll-target="#where-its-heading">Where it’s heading</a></li>
   <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
@@ -177,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report — so staff can pull the data themselves with a few filters, no SQL required.
+    I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report - so staff can pull the data themselves with a few filters, no SQL required.
   </div>
 </div>
 
@@ -213,23 +213,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>This is a public write-up of an internal reporting project. To protect the company, I’ve deliberately left out all sensitive details — database server names, connection strings, the real table/column schema, and business-specific logic. The SQL below is a <strong>generic, invented example</strong> that shows the <em>technique</em>, not the real query.</p>
+<p>This is a public write-up of an internal reporting project. To protect the company, I’ve deliberately left out all sensitive details - database server names, connection strings, the real table/column schema, and business-specific logic. The SQL below is a <strong>generic, invented example</strong> that shows the <em>technique</em>, not the real query.</p>
 </div>
 </div>
 </div>
 <section id="the-idea-reports-people-can-run-themselves" class="level2">
 <h2 class="anchored" data-anchor-id="the-idea-reports-people-can-run-themselves">The idea: reports people can run themselves</h2>
-<p>A lot of business reporting still works like this: someone needs a number, so they ask an analyst, who writes or runs a query and sends back a spreadsheet. It works, but it doesn’t scale — every question is a round trip.</p>
-<p>I wanted to build the opposite: a <strong>self-service report</strong>. The analyst (me) writes and validates the SQL once; after that, anyone can open the report in the company’s reporting tool, type in a few filters — a date range, a plant, a customer — and get exactly the slice of data they need, without ever seeing a line of SQL.</p>
+<p>A lot of business reporting still works like this: someone needs a number, so they ask an analyst, who writes or runs a query and sends back a spreadsheet. It works, but it doesn’t scale - every question is a round trip.</p>
+<p>I wanted to build the opposite: a <strong>self-service report</strong>. The analyst (me) writes and validates the SQL once; after that, anyone can open the report in the company’s reporting tool, type in a few filters - a date range, a plant, a customer - and get exactly the slice of data they need, without ever seeing a line of SQL.</p>
 <p>The first report I built this way was a <strong>daily sales report</strong> (for SOX compliance): a clean, one-row-per-order-line view of what was sold, to whom, where it was going, and what it was worth.</p>
 </section>
-<section id="step-1-write-and-validate-the-sql" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-write-and-validate-the-sql">Step 1 — Write and validate the SQL</h2>
+<section id="step-1---write-and-validate-the-sql" class="level2">
+<h2 class="anchored" data-anchor-id="step-1---write-and-validate-the-sql">Step 1 - Write and validate the SQL</h2>
 <p>The foundation is a single, fairly involved query. It joins the order, line, product, customer, currency and destination tables together and flattens them into one tidy row per order line. Along the way it does the unglamorous-but-essential work that makes a report trustworthy:</p>
 <ul>
-<li><strong>Currency conversion</strong> — every sale value is converted from its order currency into AUD using the exchange rate <em>on the sale date</em>, while also keeping the original foreign-currency value.</li>
-<li><strong>Unit conversion</strong> — order weights are converted into a single common unit (kilograms), regardless of the unit they were entered in.</li>
-<li><strong>Correct grain</strong> — careful joins and de-duplication so the report is exactly one row per line, with no accidental fan-out.</li>
+<li><strong>Currency conversion</strong> - every sale value is converted from its order currency into AUD using the exchange rate <em>on the sale date</em>, while also keeping the original foreign-currency value.</li>
+<li><strong>Unit conversion</strong> - order weights are converted into a single common unit (kilograms), regardless of the unit they were entered in.</li>
+<li><strong>Correct grain</strong> - careful joins and de-duplication so the report is exactly one row per line, with no accidental fan-out.</li>
 </ul>
 <p>While developing, I used <code>DECLARE</code> statements at the top to hard-code test values so I could run and check the query locally until the numbers were right:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- During development: hard-code inputs to test the query locally</span></span>
@@ -248,24 +248,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">join</span>      Customers   c <span class="kw">on</span> c.<span class="kw">Id</span>         <span class="op">=</span> o.CustomerId</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span>     o.SaleDate <span class="kw">between</span> @StartDate <span class="kw">and</span> @EndDate</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span>     (@Plant <span class="op">=</span> <span class="st">''</span> <span class="kw">or</span> o.Plant <span class="op">=</span> @Plant);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><em>(All names above are invented placeholders — the real query is more involved and against a different schema.)</em></p>
+<p><em>(All names above are invented placeholders - the real query is more involved and against a different schema.)</em></p>
 </section>
-<section id="step-2-rebuild-it-as-a-parameterised-report" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-rebuild-it-as-a-parameterised-report">Step 2 — Rebuild it as a parameterised report</h2>
+<section id="step-2---rebuild-it-as-a-parameterised-report" class="level2">
+<h2 class="anchored" data-anchor-id="step-2---rebuild-it-as-a-parameterised-report">Step 2 - Rebuild it as a parameterised report</h2>
 <p>This is the part that makes it self-service, and the part I found most interesting. The company uses an <strong>enterprise ERP reporting tool</strong> (a grid-style report builder). Once my SQL returned the right table, I moved it into that tool and reshaped it into a report:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cover.svg" class="img-fluid figure-img" alt="Diagram showing a validated SQL query flowing into an ERP report tool where DECLAREs become parameters and result columns define a grid, producing a self-service report."></p>
-<figcaption>The workflow: a validated SQL query becomes a self-service report — its <code>DECLARE</code>s turn into user parameters, and result columns define the output grid.</figcaption>
+<figcaption>The workflow: a validated SQL query becomes a self-service report - its <code>DECLARE</code>s turn into user parameters, and result columns define the output grid.</figcaption>
 </figure>
 </div>
 <ol type="1">
 <li><strong>Paste the SQL</strong> into the tool’s SQL statement.</li>
-<li><strong>Remove the <code>DECLARE</code> statements.</strong> Those were only for local testing — the tool doesn’t want hard-coded values.</li>
+<li><strong>Remove the <code>DECLARE</code> statements.</strong> Those were only for local testing - the tool doesn’t want hard-coded values.</li>
 <li><strong>Recreate each <code>DECLARE</code> as a Parameter.</strong> Every variable I’d hard-coded becomes a user input field: <em>Start Date</em>, <em>End Date</em>, <em>Plant</em>, <em>Customer</em>, <em>Product</em>, <em>Status</em>. At runtime the tool injects whatever the user types into the query in place of the old variables.</li>
-<li><strong>Define the Result Columns</strong> — the output structure: which columns appear, their labels, their data types, and their formatting (number masks, date formats). This is what turns a raw result set into a clean, readable grid.</li>
+<li><strong>Define the Result Columns</strong> - the output structure: which columns appear, their labels, their data types, and their formatting (number masks, date formats). This is what turns a raw result set into a clean, readable grid.</li>
 </ol>
-<p>The result: a report where a user picks a date range and a couple of filters, hits run, and gets the matching data table — powered by my SQL, but with none of its complexity exposed.</p>
+<p>The result: a report where a user picks a date range and a couple of filters, hits run, and gets the matching data table - powered by my SQL, but with none of its complexity exposed.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- In the report tool, the DECLAREs are gone; the tool supplies the values from</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- the user's parameter inputs. The query body just references them:</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span> o.SaleDate <span class="kw">between</span> @StartDate <span class="kw">and</span> @EndDate</span>
@@ -276,14 +276,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="doing-it-properly-the-engineering-around-the-sql">Doing it properly: the engineering around the SQL</h2>
 <p>The query is only half the work. To make this reliable and maintainable, I also:</p>
 <ul>
-<li><strong>Built a data dictionary.</strong> Enterprise schemas are full of coded columns whose meaning isn’t obvious (order <em>type</em> vs.&nbsp;domestic/export <em>flag</em>, product class codes, and so on). I confirmed each one against the database and recorded it — with <em>how</em> and <em>when</em> it was verified — so I (and anyone after me) can trust those meanings without re-querying every time.</li>
-<li><strong>Handled test-vs-production data gaps.</strong> I built and validated the report in a test (UAT) environment where some master-data fields aren’t populated yet. Rather than hide that, I documented each field as a known gap that’s expected to fill in once it runs against production — so the joins are already correct and ready.</li>
+<li><strong>Built a data dictionary.</strong> Enterprise schemas are full of coded columns whose meaning isn’t obvious (order <em>type</em> vs.&nbsp;domestic/export <em>flag</em>, product class codes, and so on). I confirmed each one against the database and recorded it - with <em>how</em> and <em>when</em> it was verified - so I (and anyone after me) can trust those meanings without re-querying every time.</li>
+<li><strong>Handled test-vs-production data gaps.</strong> I built and validated the report in a test (UAT) environment where some master-data fields aren’t populated yet. Rather than hide that, I documented each field as a known gap that’s expected to fill in once it runs against production - so the joins are already correct and ready.</li>
 <li><strong>Documented every assumption.</strong> Some definitions genuinely needed a manager’s sign-off (which date counts as the official “sale” date, how a particular price should be defined). I flagged each one clearly in the code and spec as an open question rather than quietly guessing.</li>
 </ul>
 </section>
 <section id="where-its-heading" class="level2">
 <h2 class="anchored" data-anchor-id="where-its-heading">Where it’s heading</h2>
-<p>Right now the report lives inside the reporting tool. The bigger plan is to build a proper <strong>UI / app on top of it</strong>, so that anyone across the business can open a simple web page, choose their filters, and look up this information directly — turning a one-off analyst query into a genuine self-service tool that scales to the whole company.</p>
+<p>Right now the report lives inside the reporting tool. The bigger plan is to build a proper <strong>UI / app on top of it</strong>, so that anyone across the business can open a simple web page, choose their filters, and look up this information directly - turning a one-off analyst query into a genuine self-service tool that scales to the whole company.</p>
 </section>
 <section id="what-i-learned" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>

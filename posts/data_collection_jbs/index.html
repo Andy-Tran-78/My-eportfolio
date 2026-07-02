@@ -224,13 +224,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>The figures, customers and file contents shown in this project are <strong>not</strong> included here — this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.</p>
+<p>The figures, customers and file contents shown in this project are <strong>not</strong> included here - this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.</p>
 </div>
 </div>
 </div>
 <section id="the-problem-too-many-files-not-enough-time" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-too-many-files-not-enough-time">The problem: too many files, not enough time</h2>
-<p>While working on the <strong>Sales &amp; Operations Planning (S&amp;OP)</strong> side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed <em>one</em> clean, consolidated view of the business — how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially — across several production plants.</p>
+<p>While working on the <strong>Sales &amp; Operations Planning (S&amp;OP)</strong> side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed <em>one</em> clean, consolidated view of the business - how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially - across several production plants.</p>
 <p>The catch was that none of this data lived in one place. Each plant exported its own files, in its own format, from its own system:</p>
 <ul>
 <li><strong>Stock on Hand (SOH)</strong> came out as Excel workbooks.</li>
@@ -287,7 +287,7 @@ Complete_file/          &lt;- one cleaned output per week
   w47_2025.xlsx
   w01_2026.xlsx
   ...</code></pre>
-<p>Because the layout is always the same, the code never has to guess where anything is — it just needs to know <em>which week</em> I want. That predictability is what makes the pipeline repeatable.</p>
+<p>Because the layout is always the same, the code never has to guess where anything is - it just needs to know <em>which week</em> I want. That predictability is what makes the pipeline repeatable.</p>
 </section>
 <section id="the-core-idea-one-key-to-join-everything" class="level2">
 <h2 class="anchored" data-anchor-id="the-core-idea-one-key-to-join-everything">The core idea: one key to join everything</h2>
@@ -315,14 +315,14 @@ Complete_file/          &lt;- one cleaned output per week
 </section>
 <section id="clean-each-source-into-the-same-shape" class="level3">
 <h3 class="anchored" data-anchor-id="clean-each-source-into-the-same-shape">2. Clean each source into the same shape</h3>
-<p>Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the <code>Key</code>. Dispatch is a good example — the raw CSV becomes three tidy columns:</p>
+<p>Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the <code>Key</code>. Dispatch is a good example - the raw CSV becomes three tidy columns:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>corowa_dispatch <span class="ot">&lt;-</span> corowa_dispatch <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ItemKey, DeliveryWeight) <span class="sc">%&gt;%</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Item =</span> ItemKey, <span class="at">Dispatch =</span> DeliveryWeight) <span class="sc">%&gt;%</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Item) <span class="sc">%&gt;%</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Dispatch_corowa =</span> <span class="fu">sum</span>(Dispatch, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Key =</span> <span class="fu">paste0</span>(Item, <span class="st">"Corowa"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The same pattern is repeated for stock, production, forecast, finance and sales — each ending up as a small table keyed by <code>Key</code>. Handling each source’s quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn’t silently fail.</p>
+<p>The same pattern is repeated for stock, production, forecast, finance and sales - each ending up as a small table keyed by <code>Key</code>. Handling each source’s quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn’t silently fail.</p>
 </section>
 <section id="join-it-all-into-one-table" class="level3">
 <h3 class="anchored" data-anchor-id="join-it-all-into-one-table">3. Join it all into one table</h3>
@@ -368,14 +368,14 @@ Complete_file/          &lt;- one cleaned output per week
 <section id="challenges-and-what-i-learned" class="level2">
 <h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
 <ul>
-<li><strong>Real-world data is never tidy.</strong> Most of the effort went into the unglamorous work of reconciling inconsistent formats — different header rows, mismatched column names, CSV vs.&nbsp;Excel vs.&nbsp;binary <code>.xlsb</code>, and item codes stored as numbers in one file and text in another.</li>
+<li><strong>Real-world data is never tidy.</strong> Most of the effort went into the unglamorous work of reconciling inconsistent formats - different header rows, mismatched column names, CSV vs.&nbsp;Excel vs.&nbsp;binary <code>.xlsb</code>, and item codes stored as numbers in one file and text in another.</li>
 <li><strong>Design for repeatability.</strong> Committing to one folder convention and one join key turned a fragile manual process into something I could re-run for any week with a two-line change.</li>
-<li><strong>Fail loudly, not silently.</strong> The missing-items check taught me that in data work, the dangerous errors aren’t the ones that crash — they’re the ones that quietly produce a plausible-but-wrong number.</li>
+<li><strong>Fail loudly, not silently.</strong> The missing-items check taught me that in data work, the dangerous errors aren’t the ones that crash - they’re the ones that quietly produce a plausible-but-wrong number.</li>
 </ul>
 </section>
 <section id="the-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It’s scalable across weeks, years and plants, and — just as importantly — it’s <strong>auditable</strong>: anyone can see exactly how each number was built.</p>
+<p>What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It’s scalable across weeks, years and plants, and - just as importantly - it’s <strong>auditable</strong>: anyone can see exactly how each number was built.</p>
 <p>It’s a small project, but it’s a good example of the kind of work I enjoy: taking a messy, real operational problem and turning it into something clean, reliable and reusable.</p>
 
 

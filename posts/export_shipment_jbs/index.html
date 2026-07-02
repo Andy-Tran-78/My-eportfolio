@@ -8,7 +8,7 @@
 
 <meta name="author" content="Tran Dang Huy (Andy)">
 <meta name="dcterms.date" content="2026-03-01">
-<meta name="description" content="An inventory controller spent 1–2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.">
+<meta name="description" content="An inventory controller spent 1-2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.">
 
 <title>Predicting Shipment Weeks with a Stock Simulation in R – About me</title>
 <style>
@@ -159,7 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#turning-a-messy-delivery-date-into-a-week-window" id="toc-turning-a-messy-delivery-date-into-a-week-window" class="nav-link" data-scroll-target="#turning-a-messy-delivery-date-into-a-week-window">Turning a messy “delivery date” into a week window</a></li>
   <li><a href="#the-heart-of-it-simulating-stock-week-by-week" id="toc-the-heart-of-it-simulating-stock-week-by-week" class="nav-link" data-scroll-target="#the-heart-of-it-simulating-stock-week-by-week">The heart of it: simulating stock week by week</a>
   <ul class="collapse">
-  <li><a href="#protecting-priority-orders-the-clever-bit" id="toc-protecting-priority-orders-the-clever-bit" class="nav-link" data-scroll-target="#protecting-priority-orders-the-clever-bit">Protecting priority orders — the clever bit</a></li>
+  <li><a href="#protecting-priority-orders---the-clever-bit" id="toc-protecting-priority-orders---the-clever-bit" class="nav-link" data-scroll-target="#protecting-priority-orders---the-clever-bit">Protecting priority orders - the clever bit</a></li>
   <li><a href="#deciding-the-status" id="toc-deciding-the-status" class="nav-link" data-scroll-target="#deciding-the-status">Deciding the status</a></li>
   </ul></li>
   <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example">A worked example</a></li>
@@ -183,7 +183,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    An inventory controller spent 1–2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.
+    An inventory controller spent 1-2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.
   </div>
 </div>
 
@@ -224,16 +224,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="the-problem-forecasting-shipments-by-hand-every-week" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-forecasting-shipments-by-hand-every-week">The problem: forecasting shipments by hand, every week</h2>
-<p>An inventory controller on the Logistics team had one of those tasks that quietly gets worse over time. Every week she had to look at all the open orders and, for each one, work out <strong>which week it could actually ship</strong> — juggling the stock currently on hand, the stock that production would add in the coming weeks, and which orders were urgent.</p>
-<p>With a handful of orders that’s manageable. But the order book kept growing, and the interactions between orders compounded: shipping one early might starve a more urgent one later. What started as a ~1 hour job crept up to <strong>1–2 hours every week</strong>, and the more orders there were, the easier it was to make a mistake or miss that an order was heading for a late delivery.</p>
-<p>So I built a model that does the whole thing automatically: it <strong>simulates stock forward through the year</strong> and, for every order, predicts the week it should ship — while also telling her exactly <strong>which orders are in trouble</strong> and why.</p>
+<p>An inventory controller on the Logistics team had one of those tasks that quietly gets worse over time. Every week she had to look at all the open orders and, for each one, work out <strong>which week it could actually ship</strong> - juggling the stock currently on hand, the stock that production would add in the coming weeks, and which orders were urgent.</p>
+<p>With a handful of orders that’s manageable. But the order book kept growing, and the interactions between orders compounded: shipping one early might starve a more urgent one later. What started as a ~1 hour job crept up to <strong>1-2 hours every week</strong>, and the more orders there were, the easier it was to make a mistake or miss that an order was heading for a late delivery.</p>
+<p>So I built a model that does the whole thing automatically: it <strong>simulates stock forward through the year</strong> and, for every order, predicts the week it should ship - while also telling her exactly <strong>which orders are in trouble</strong> and why.</p>
 </section>
 <section id="what-it-produces" class="level2">
 <h2 class="anchored" data-anchor-id="what-it-produces">What it produces</h2>
 <p>The controller drops the week’s data into a <code>Data</code> folder and runs the script. Out comes a results file where every order has:</p>
 <ul>
 <li>a <strong>predicted shipment week</strong>;</li>
-<li>a <strong>status</strong> — <em>On time</em>, <em>Delayed</em> (with how many weeks late), <em>Cannot deliver this year</em>, or a data problem such as <em>Missing SOH / Production / Code</em>, <em>Missing Shipment Period</em>, or <em>Invalid Quantity</em>;</li>
+<li>a <strong>status</strong> - <em>On time</em>, <em>Delayed</em> (with how many weeks late), <em>Cannot deliver this year</em>, or a data problem such as <em>Missing SOH / Production / Code</em>, <em>Missing Shipment Period</em>, or <em>Invalid Quantity</em>;</li>
 <li>the <strong>stock available before and after</strong> that order ships, so the reasoning is transparent.</li>
 </ul>
 <p>That status column is the part she values most: instead of discovering a late shipment by accident, the model surfaces every problem order up front.</p>
@@ -262,7 +262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="turning-a-messy-delivery-date-into-a-week-window" class="level2">
 <h2 class="anchored" data-anchor-id="turning-a-messy-delivery-date-into-a-week-window">Turning a messy “delivery date” into a week window</h2>
-<p>Orders don’t state their timing consistently. Some say a week (<code>W10</code>, <code>Week 10</code>, <code>10</code>), some give a month or even a range of months (<code>March</code>, <code>Jan–Mar</code>). The model normalises all of that into a <strong>delivery window</strong> — an earliest and latest week the order is allowed to ship in:</p>
+<p>Orders don’t state their timing consistently. Some say a week (<code>W10</code>, <code>Week 10</code>, <code>10</code>), some give a month or even a range of months (<code>March</code>, <code>Jan-Mar</code>). The model normalises all of that into a <strong>delivery window</strong> - an earliest and latest week the order is allowed to ship in:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A week reference -&gt; that exact week; a month (or month range) -&gt; the ISO weeks</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># spanning the 1st of the earliest month to the last day of the latest month.</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>shipment_period_to_weeks <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">yr =</span> <span class="fu">year</span>(<span class="fu">Sys.Date</span>())) {</span>
@@ -270,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...detect month tokens          -&gt; start_week = isoweek(first day),</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                     end_week   = isoweek(last day)</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Distinct periods are parsed <strong>once</strong> and joined back on, rather than re-parsing the same text for every order — a small but meaningful speed-up on a large order book. Every order ends up with a <code>start_week</code> (earliest it can go) and <code>end_week</code> (its deadline).</p>
+<p>Distinct periods are parsed <strong>once</strong> and joined back on, rather than re-parsing the same text for every order - a small but meaningful speed-up on a large order book. Every order ends up with a <code>start_week</code> (earliest it can go) and <code>end_week</code> (its deadline).</p>
 </section>
 <section id="the-heart-of-it-simulating-stock-week-by-week" class="level2">
 <h2 class="anchored" data-anchor-id="the-heart-of-it-simulating-stock-week-by-week">The heart of it: simulating stock week by week</h2>
@@ -281,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1) Ship PRIORITY orders that are due/overdue (end_week &lt;= w), earliest deadline first</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#    ...ship each if stock &gt;= qty, recording before/after stock and the ship week...</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) If a due priority order still can't be shipped, STOP for this week —</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) If a due priority order still can't be shipped, STOP for this week -</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#    don't spend stock on anything else; let it accumulate.</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (any_priority_still_due_and_unshipped) <span class="cf">next</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
@@ -293,8 +293,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (all_orders_for_this_code_shipped) <span class="cf">break</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="protecting-priority-orders-the-clever-bit" class="level3">
-<h3 class="anchored" data-anchor-id="protecting-priority-orders-the-clever-bit">Protecting priority orders — the clever bit</h3>
+<section id="protecting-priority-orders---the-clever-bit" class="level3">
+<h3 class="anchored" data-anchor-id="protecting-priority-orders---the-clever-bit">Protecting priority orders - the clever bit</h3>
 <p>The subtle part is step 3. It’s not enough to ship priority orders when they’re due; you have to make sure that <em>today’s</em> non-priority shipments don’t quietly use up stock that a priority order will need later. So before shipping anything non-priority, the model calculates a <strong>reserve</strong>: the amount of current stock that must be held back so every remaining priority order can still be met by its deadline, given the production expected to arrive in the meantime.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>reserve_needed <span class="ot">&lt;-</span> <span class="cf">function</span>(w, remaining_priority_rows) {</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  pri <span class="ot">&lt;-</span> remaining_priority <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(end_week)      <span class="co"># by deadline</span></span>
@@ -304,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  req <span class="ot">&lt;-</span> cum_qty <span class="sc">-</span> prod <span class="sc">*</span> <span class="fu">pmax</span>(<span class="dv">0</span>L, deadlines <span class="sc">-</span> w)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">max</span>(req, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))                        <span class="co"># worst-case shortfall = reserve</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>In plain terms: for each priority deadline it asks <em>“how much stock do I need right now to cover everything due by then, after counting the production I’ll receive before that date?”</em> — and reserves the largest of those requirements. Non-priority orders can only draw on stock <strong>above</strong> that line. This is what stops a routine order from accidentally making an urgent one late.</p>
+<p>In plain terms: for each priority deadline it asks <em>“how much stock do I need right now to cover everything due by then, after counting the production I’ll receive before that date?”</em> - and reserves the largest of those requirements. Non-priority orders can only draw on stock <strong>above</strong> that line. This is what stops a routine order from accidentally making an urgent one late.</p>
 </section>
 <section id="deciding-the-status" class="level3">
 <h3 class="anchored" data-anchor-id="deciding-the-status">Deciding the status</h3>
@@ -312,15 +312,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.na</span>(ship_week))            status <span class="ot">&lt;-</span> <span class="st">"Cannot deliver this year"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> <span class="cf">if</span> (ship_week <span class="sc">&gt;</span> end_week)   { status <span class="ot">&lt;-</span> <span class="st">"Delayed"</span>; delay_weeks <span class="ot">&lt;-</span> ship_week <span class="sc">-</span> end_week }</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>                             { status <span class="ot">&lt;-</span> <span class="st">"On time"</span>;  delay_weeks <span class="ot">&lt;-</span> <span class="dv">0</span> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Orders that never got a shipment week (not enough stock + production all year) are flagged <em>Cannot deliver</em>; anything shipping after its deadline is <em>Delayed</em> with the exact number of weeks. Separately, orders missing a product code, stock figure, production figure, quantity or period are flagged as data problems <strong>instead of being silently dropped</strong> — every input row comes back in the output with an explanation.</p>
+<p>Orders that never got a shipment week (not enough stock + production all year) are flagged <em>Cannot deliver</em>; anything shipping after its deadline is <em>Delayed</em> with the exact number of weeks. Separately, orders missing a product code, stock figure, production figure, quantity or period are flagged as data problems <strong>instead of being silently dropped</strong> - every input row comes back in the output with an explanation.</p>
 </section>
 </section>
 <section id="a-worked-example" class="level2">
 <h2 class="anchored" data-anchor-id="a-worked-example">A worked example</h2>
 <p>Say one product has <strong>10 units in stock</strong>, produces <strong>4 units/week</strong>, and it’s currently <strong>week 10</strong>. Two orders are open:</p>
 <ul>
-<li><strong>Order A — priority</strong>, 20 units, due <strong>week 12</strong></li>
-<li><strong>Order B — normal</strong>, 6 units, ready from week 10</li>
+<li><strong>Order A - priority</strong>, 20 units, due <strong>week 12</strong></li>
+<li><strong>Order B - normal</strong>, 6 units, ready from week 10</li>
 </ul>
 <table class="caption-top table">
 <colgroup>
@@ -358,7 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p>Order B <em>could</em> physically have shipped in week 10 if we were careless — but doing so would have made the priority order A late. The reserve logic holds B back until A is safe. If B’s own deadline had been week 11, the model would have shipped it in week 13 and flagged it <strong>Delayed by 2 weeks</strong> — exactly the kind of early warning the controller needs.</p>
+<p>Order B <em>could</em> physically have shipped in week 10 if we were careless - but doing so would have made the priority order A late. The reserve logic holds B back until A is safe. If B’s own deadline had been week 11, the model would have shipped it in week 13 and flagged it <strong>Delayed by 2 weeks</strong> - exactly the kind of early warning the controller needs.</p>
 </section>
 <section id="challenges-and-what-i-learned" class="level2">
 <h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
@@ -371,7 +371,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>A 1–2 hour weekly forecast — one that got harder as the order book grew — became an automated run that predicts a shipment week for every order, keeps urgent orders protected, and hands the controller a ready-made list of the orders that need her attention. It’s the most logically involved project I’ve built, and the one where getting the <em>rules</em> right mattered just as much as getting the code right.</p>
+<p>A 1-2 hour weekly forecast - one that got harder as the order book grew - became an automated run that predicts a shipment week for every order, keeps urgent orders protected, and hands the controller a ready-made list of the orders that need her attention. It’s the most logically involved project I’ve built, and the one where getting the <em>rules</em> right mattered just as much as getting the code right.</p>
 
 
 </section>
