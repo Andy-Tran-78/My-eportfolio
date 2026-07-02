@@ -26,3 +26,8 @@
 # Real stock/production/open-sales data (Data/), buyer names, results CSV, and
 # .RData/.Rhistory. Kept private; public write-up lives in posts/export_shipment_jbs/ instead.
 /posts/Export Shipment project/
+
+# Confidential source material for the Financial Forecast project.
+# Real GL/financial data (Data/, GL_DB Template.csv, Gap_Check.xlsx, .RData) and a
+# nested git repo. Kept private; public write-up lives in posts/financial_forecast_jbs/ instead.
+/posts/Forecast Project/

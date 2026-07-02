@@ -2,6 +2,7 @@
   {
     "listing": "/posts/index.html",
     "items": [
+      "/posts/financial_forecast_jbs/index.html",
       "/posts/export_shipment_jbs/index.html",
       "/posts/data_consolidation_jbs/index.html",
       "/posts/shiny_app_jbs/index.html",

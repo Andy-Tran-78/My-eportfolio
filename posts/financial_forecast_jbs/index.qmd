@@ -1,0 +1,108 @@
+---
+title: "Rebuilding a 30MB Excel Forecast Model as an R Pipeline"
+author: "Tran Dang Huy (Andy)"
+title-block-banner: false
+description: "My manager's financial forecast lived in a 30MB Excel file that froze every time he touched it — useless in a meeting. I rebuilt it as an R pipeline that turns raw data into a full general-ledger forecast in about five minutes, and audits its own data quality."
+date: 2026-05-01
+categories: [Project, R, Finance]
+image: cover.svg
+---
+
+::: {.callout-note appearance="simple"}
+This is a public write-up of a Finance Team project, so all real financial data has been kept private. The code snippets below are simplified and redacted to show the *logic* only — no company figures, customers, or data are shared.
+:::
+
+🔗 **The full code (with all data excluded) is on GitHub:** [Jakey-vn/ETC5543_Project](https://github.com/Jakey-vn/ETC5543_Project)
+
+## The problem: a spreadsheet too heavy to use
+
+My manager on the Commercial Finance team had built a financial **forecast model** in Excel. It worked, but it had grown into a **~30MB monster**. Every time he changed an input, the file took an age to recalculate and open — and in a live meeting, where the whole point is to react to questions on the spot, a spreadsheet that freezes for minutes is effectively useless.
+
+The model itself wasn't the problem; the *tool* was. Excel simply wasn't built to carry that much interconnected calculation. So I rebuilt the whole thing in **R**: a pipeline where you drop the latest data into a folder, run it, and about **five minutes later** you have the complete forecast — as a clean general-ledger (GL) database ready for reporting.
+
+## What it produces
+
+The pipeline outputs a single **GL database file** (`GL_DB Template.csv`) — the forecast broken down into general-ledger lines (revenue and expense) across the business's four units:
+
+1. Farming Operations
+2. Meat Processing (Corowa)
+3. Meat Sales
+4. Laverton Processing
+
+Every line is tagged with its **GL account** (e.g. external sales, intercompany sales, freight, packaging, storage, cost of sales) and **cost centre**, so it drops straight into the finance reporting system. For scale: the main script is around **4,700 lines across ~140 steps**, covering dozens of GL accounts.
+
+## The core idea: accounts + data → join
+
+Underneath all the size, the whole model follows **one repeating pattern**. For every kind of value — each revenue stream, then each expense type — I do three things:
+
+1. **Build the *account*** — the skeleton of *where* a value belongs: its GL account, cost centre, business unit, floor and customers.
+2. **Build the *data*** — the actual **volume, priced up** into a dollar value, using the right price source for that product type.
+3. **Join account + data** — attach the calculated values onto the correct accounts, producing a block of finished GL rows.
+
+Then I stack all those blocks together into the final database. In simplified form, one revenue block looks like this:
+
+```r
+# 1) ACCOUNT — the skeleton: which GL account / cost centre / customers this belongs to
+account_boxed_meat <- customer_data %>%
+  filter(BU == "2.Meat Processing", Floor == "Boxed Meat") %>%
+  mutate(`GL Account` = "400000", `Cc Key` = "10501816")   # external sales
+
+# 2) DATA — the priced volume: weight x the correct price source for this floor
+value_boxed_meat <- volume_boxed_meat_raw %>%
+  left_join(item_price_data, by = "Item Code") %>%
+  mutate(Value = `Total Weight` * Price) %>%
+  group_by(Abattoir, Month, `Item Code`) %>%
+  summarise(Value = sum(Value), .groups = "drop")
+
+# 3) JOIN account + data -> finished GL rows
+gl_boxed_meat <- account_boxed_meat %>%
+  left_join(value_boxed_meat, by = c("Abattoir", "Month", "Item Code"))
+```
+
+Different floors pull their price from different places — carcass price, kill fee, bone fee, item price, and so on — but the *shape* of every block is the same. Once that pattern clicks, a 4,700-line script stops being scary: it's the same idea repeated carefully, many times.
+
+## Why it got big: the special conditions
+
+If it were just "volume × price" everywhere, this would be a small script. The real complexity — and the reason it ballooned — is that **almost every account has its own special rule**, dictated by how the business actually operates. A few real examples:
+
+- **Intercompany vs external.** The same product can be an external sale (account `400000`) or an internal transfer between units (`400028`). Laverton, for instance, consolidates its edible offal under Corowa's name to sell it — so that volume has to be booked as intercompany, not external.
+- **The Lineage discount.** Laverton ships some products through a cold store (Lineage) that charges a handling fee, so a **$0.51/kg discount** is subtracted from those values — which is the whole reason Corowa and Laverton offal have to be calculated *separately*.
+- **Special contracts.** Customers like Woolworths and DRJ have bespoke packaging fees and margin percentages, applied to a bone-out weight that first has to be adjusted by hot-to-cold and cold-to-meat **yield factors**.
+- **Price fallbacks and temporary fixes.** Packaging prices are looked up at one "variant" and fall back to another if missing; where a price is genuinely absent in the source, a temporary fixed rate is applied until the data is corrected.
+
+Each of these is small on its own. Together, across four business units and dozens of accounts, they're what make the model genuinely complicated — and exactly what Excel had made so fragile.
+
+## Keeping it honest: the Gap Check
+
+A model this size is only trustworthy if you can prove nothing fell through the cracks. So I wrote a second script, **`Gap_Check.R`**, that runs after the main pipeline and reconciles **volume in vs volume out**.
+
+The idea is simple: the total weight going *in* (from the raw SOP volume source) should equal the total weight coming *out* (into the priced database) for every category. If they don't match, something was dropped — and the gap check finds exactly what:
+
+```r
+# Volume IN (raw source) vs volume OUT (what reached the database), per category
+comparison <- tibble(
+  Category         = c("Corowa - 6 Way", "Laverton - Commodity FRZ", "..."),
+  `SOP Raw Weight` = c(sop_wt(corowa_6way_in),  sop_wt(lav_commodity_in),  ...),  # in
+  `DB Weight`      = c(db_wt(corowa_6way_out),  db_wt(lav_commodity_out),  ...)   # out
+)
+
+# WHICH items are in the input but never got priced into the output — and why
+bone_no_price <- volume_bone_raw %>%
+  anti_join(item_price_data, by = c("Item Code" = "Item Key")) %>%
+  filter(`Total Weight` != 0)     # -> fix: "Add this Item Code to the price sheet"
+```
+
+Using `anti_join` in both directions, it lists every item that appears **in the input but not the output** (and vice versa), classifies *why* — missing price, missing storage type, an unmapped code — and prints a **suggested fix** for each one, all into a `Gap_Check.xlsx` report.
+
+This turned out to be one of the most valuable parts of the project. On one run the numbers didn't reconcile: volume out was smaller than volume in. The gap check pinpointed the culprit — some items had been **recorded in the wrong place** in the source data, so they failed the join conditions and silently dropped out. It was a genuine data-entry mistake upstream in the S&OP data; the S&OP team fixed it immediately once the report showed them exactly which items and how much weight were affected. Instead of a quietly-wrong forecast, we had a self-auditing one.
+
+## Challenges and what I learned
+
+- **Complexity lives in the rules, not the code.** The hard part wasn't R — it was faithfully translating dozens of real business exceptions (discounts, intercompany flows, special contracts) into consistent, auditable logic.
+- **A repeatable pattern tames scale.** Committing to the same "account + data + join" structure for every account is what kept 4,700 lines maintainable instead of chaotic.
+- **Build the auditor alongside the model.** The gap check made the pipeline trustworthy and even improved the upstream data — a reminder that in finance work, being able to *prove* the number is as important as producing it.
+- **The right tool matters.** The same model that made Excel freeze runs comfortably in R in minutes, because the tool actually fits the size of the problem.
+
+## The outcome
+
+A 30MB spreadsheet that was too heavy to use in the meetings it was built for became a **five-minute, data-in-report-out pipeline** — one that produces a full general-ledger forecast across four business units and checks its own data quality on the way. It's the largest and most intricate project I've built, and the one that taught me the most about turning messy real-world business rules into something reliable.

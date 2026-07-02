@@ -10,6 +10,7 @@ project:
     - posts/shiny_app_jbs/index.qmd
     - posts/data_consolidation_jbs/index.qmd
     - posts/export_shipment_jbs/index.qmd
+    - posts/financial_forecast_jbs/index.qmd
 
 
 website:
