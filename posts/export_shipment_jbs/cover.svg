@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#f4f6f7"/>
+  <rect width="1200" height="140" fill="#2c3e50"/>
+  <text x="60" y="70" fill="#ffffff" font-size="44" font-weight="700">Shipment Week Predictor</text>
+  <text x="60" y="112" fill="#18bc9c" font-size="24" font-weight="500">Simulating stock, production &amp; priority orders week by week in R</text>
+
+  <!-- Chart panel -->
+  <rect x="70" y="175" width="900" height="390" rx="10" fill="#ffffff" stroke="#e0e4e6" stroke-width="2"/>
+  <text x="90" y="205" fill="#2c3e50" font-size="18" font-weight="700">Stock level over weeks</text>
+
+  <!-- gridlines -->
+  <g stroke="#eceff1" stroke-width="1.5">
+    <line x1="120" y1="300" x2="940" y2="300"/>
+    <line x1="120" y1="380" x2="940" y2="380"/>
+    <line x1="120" y1="460" x2="940" y2="460"/>
+  </g>
+  <!-- baseline / axis -->
+  <line x1="120" y1="520" x2="940" y2="520" stroke="#b0bec5" stroke-width="2"/>
+
+  <!-- stock step line: rises with production, drops at shipment -->
+  <polyline points="160,420 280,368 400,316 400,500 520,452 640,400 760,368 880,320"
+            fill="none" stroke="#18bc9c" stroke-width="4"/>
+  <!-- point markers -->
+  <g fill="#2c3e50">
+    <circle cx="160" cy="420" r="5"/>
+    <circle cx="280" cy="368" r="5"/>
+    <circle cx="520" cy="452" r="5"/>
+    <circle cx="640" cy="400" r="5"/>
+    <circle cx="760" cy="368" r="5"/>
+    <circle cx="880" cy="320" r="5"/>
+  </g>
+  <!-- shipment event at week 12 (on time) -->
+  <circle cx="400" cy="316" r="9" fill="#18bc9c" stroke="#0b5c4c" stroke-width="2"/>
+  <text x="400" y="298" fill="#12987d" font-size="15" font-weight="700" text-anchor="middle">ship &#9660;</text>
+
+  <!-- x labels -->
+  <g fill="#607d8b" font-size="16" text-anchor="middle">
+    <text x="160" y="545">W10</text>
+    <text x="280" y="545">W11</text>
+    <text x="400" y="545">W12</text>
+    <text x="520" y="545">W13</text>
+    <text x="640" y="545">W14</text>
+    <text x="760" y="545">W15</text>
+    <text x="880" y="545">W16</text>
+  </g>
+
+  <!-- status legend -->
+  <text x="1010" y="215" fill="#2c3e50" font-size="18" font-weight="700">Order status</text>
+  <g font-size="16" fill="#37474f">
+    <circle cx="1020" cy="255" r="9" fill="#18bc9c"/><text x="1040" y="261">On time</text>
+    <circle cx="1020" cy="295" r="9" fill="#f0ad4e"/><text x="1040" y="301">Delayed</text>
+    <circle cx="1020" cy="335" r="9" fill="#e74c3c"/><text x="1040" y="341">Cannot deliver</text>
+    <circle cx="1020" cy="375" r="9" fill="#b0bec5"/><text x="1040" y="381">Missing data</text>
+  </g>
+
+  <text x="70" y="605" fill="#95a5a6" font-size="18">Turning a 1–2 hour weekly hand-forecast into an automated, flagged prediction</text>
+</svg>

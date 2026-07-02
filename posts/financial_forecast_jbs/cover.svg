@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#f4f6f7"/>
+  <rect width="1200" height="140" fill="#2c3e50"/>
+  <text x="60" y="70" fill="#ffffff" font-size="44" font-weight="700">Financial Forecast Engine</text>
+  <text x="60" y="112" fill="#18bc9c" font-size="24" font-weight="500">Rebuilding a 30&#8239;MB Excel model as a 5-minute R pipeline</text>
+
+  <!-- Left: heavy Excel -->
+  <rect x="55" y="235" width="185" height="150" rx="12" fill="#fdecea" stroke="#e74c3c" stroke-width="3"/>
+  <text x="147" y="288" fill="#c0392b" font-size="22" font-weight="700" text-anchor="middle">Excel model</text>
+  <text x="147" y="318" fill="#c0392b" font-size="26" font-weight="700" text-anchor="middle">~30 MB</text>
+  <text x="147" y="352" fill="#a93226" font-size="15" text-anchor="middle">slow · freezes</text>
+  <text x="147" y="372" fill="#a93226" font-size="15" text-anchor="middle">in meetings</text>
+
+  <!-- Arrow -->
+  <g stroke="#18bc9c" stroke-width="6" fill="#18bc9c">
+    <line x1="248" y1="310" x2="300" y2="310"/>
+    <polygon points="300,293 330,310 300,327"/>
+  </g>
+
+  <!-- Middle: account + data -> join -->
+  <rect x="345" y="215" width="215" height="70" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="3"/>
+  <text x="452" y="248" fill="#2c3e50" font-size="19" font-weight="700" text-anchor="middle">Accounts</text>
+  <text x="452" y="270" fill="#7b8a8b" font-size="14" text-anchor="middle">GL account + cost centre</text>
+
+  <rect x="345" y="335" width="215" height="70" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="3"/>
+  <text x="452" y="368" fill="#2c3e50" font-size="19" font-weight="700" text-anchor="middle">Volume data</text>
+  <text x="452" y="390" fill="#7b8a8b" font-size="14" text-anchor="middle">volume &#215; price</text>
+
+  <!-- join arrows into node -->
+  <g stroke="#18bc9c" stroke-width="5" fill="none">
+    <path d="M560 250 q55 0 55 55 l0 5"/>
+    <path d="M560 370 q55 0 55 -55 l0 -5"/>
+  </g>
+  <circle cx="640" cy="310" r="40" fill="#18bc9c"/>
+  <text x="640" y="305" fill="#ffffff" font-size="16" font-weight="700" text-anchor="middle">join</text>
+  <text x="640" y="325" fill="#eafaf5" font-size="13" text-anchor="middle">= GL line</text>
+
+  <!-- Arrow to output -->
+  <g stroke="#18bc9c" stroke-width="6" fill="#18bc9c">
+    <line x1="685" y1="310" x2="745" y2="310"/>
+    <polygon points="745,293 775,310 745,327"/>
+  </g>
+
+  <!-- Right: GL database -->
+  <rect x="790" y="235" width="170" height="150" rx="12" fill="#2c3e50" stroke="#1a252f" stroke-width="3"/>
+  <text x="875" y="300" fill="#ffffff" font-size="20" font-weight="700" text-anchor="middle">GL database</text>
+  <text x="875" y="328" fill="#18bc9c" font-size="15" text-anchor="middle">revenue + expense</text>
+  <text x="875" y="352" fill="#95a5a6" font-size="14" text-anchor="middle">4 business units</text>
+
+  <!-- Gap check badge -->
+  <rect x="985" y="245" width="165" height="130" rx="12" fill="#eafaf5" stroke="#18bc9c" stroke-width="2.5" stroke-dasharray="7 5"/>
+  <text x="1067" y="285" fill="#12987d" font-size="18" font-weight="700" text-anchor="middle">Gap Check</text>
+  <text x="1067" y="315" fill="#0b5c4c" font-size="15" text-anchor="middle">volume in</text>
+  <text x="1067" y="337" fill="#0b5c4c" font-size="15" text-anchor="middle">= volume out ?</text>
+  <text x="1067" y="360" fill="#4a635d" font-size="13" text-anchor="middle">flags data errors</text>
+
+  <text x="60" y="575" fill="#95a5a6" font-size="18">4,731 lines · 143 steps · dozens of GL accounts, each with its own special rules</text>
+</svg>
