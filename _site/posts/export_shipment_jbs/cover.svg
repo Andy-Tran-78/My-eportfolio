@@ -53,5 +53,5 @@
     <circle cx="1020" cy="375" r="9" fill="#b0bec5"/><text x="1040" y="381">Missing data</text>
   </g>
 
-  <text x="70" y="605" fill="#95a5a6" font-size="18">Turning a 1–2 hour weekly hand-forecast into an automated, flagged prediction</text>
+  <text x="70" y="605" fill="#95a5a6" font-size="18">Turning a 1-2 hour weekly hand-forecast into an automated, flagged prediction</text>
 </svg>

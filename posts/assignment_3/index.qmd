@@ -26,9 +26,9 @@ Traditionally, infection rates were reported as prevalence (how many patients ha
 
 In 2016, the European Centre for Disease Prevention and Control (ECDC) used this approach for the first time to estimate the burden of HAIs across 29 European Union and European Economic Area (EU/EEA) countries. Their work built on the Burden of Communicable Diseases in Europe (BCoDE) project, which provided a standardized method and data framework.
 
-Building on that foundation, researchers at Germany's Robert Koch Institute applied an improved version of this method using a custom-built R package called BHAI which can be seen from @fig-hai-1. The analysis used point-prevalence survey data collected in 2011–2012 from thousands of patients in German hospitals and across Europe.
+Building on that foundation, researchers at Germany's Robert Koch Institute applied an improved version of this method using a custom-built R package called BHAI which can be seen from @fig-hai-1. The analysis used point-prevalence survey data collected in 2011-2012 from thousands of patients in German hospitals and across Europe.
 
-![Workflow for estimating the burden of healthcare-associated infections using the BHAI R package, 2011–2012.](Figure_1.png){#fig-hai-1}
+![Workflow for estimating the burden of healthcare-associated infections using the BHAI R package, 2011-2012.](Figure_1.png){#fig-hai-1}
 
 It focused on five of the most common and clinically important HAIs: CDI, HAP, BSI, UTI and SSI. By combining infection data from hospitals with population statistics, the researchers estimated how many people across Germany developed each infection, how many died as a result, and how many years of healthy life were lost. They then compared these national results with the EU/EEA average to see how Germany's healthcare system measured up internationally.
 
@@ -46,13 +46,13 @@ When the researchers applied the same method to a larger convenience sample of h
 
 When the researchers compared Germany with the rest of Europe through @fig-hai-2, they found that infections in German hospitals caused slightly more illness and death overall. For every 100 infection-related deaths in the average European country, Germany had about 130. This does not mean German hospitals are dirtier but it is mainly because the country has many more hospital beds and admissions, which means more opportunities for infection to spread.
 
-![Annual burden of five types of healthcare-associated infections with attributable deaths per 100,000 population, 2011–2012.](Figure_2.png){#fig-hai-2}
+![Annual burden of five types of healthcare-associated infections with attributable deaths per 100,000 population, 2011-2012.](Figure_2.png){#fig-hai-2}
 
 In short, Germany's strong hospital system also means more people are at risk simply because more people are treated in hospital. These results clearly show that many patients in Germany still acquire infections during their hospital stay confirming that healthcare-associated infections remain a significant and partly preventable problem in modern care.
 
 ## How the study was done
 
-To measure how much harm healthcare-associated infections (HAIs) cause, the researchers used hospital data collected by the European Center for Disease Prevention and Control (ECDC) during a point-prevalence survey in 2011–2012. This survey recorded how many hospital patients across Europe had an infection at a single point in time, along with information about their age, health condition, and hospital type.
+To measure how much harm healthcare-associated infections (HAIs) cause, the researchers used hospital data collected by the European Center for Disease Prevention and Control (ECDC) during a point-prevalence survey in 2011-2012. This survey recorded how many hospital patients across Europe had an infection at a single point in time, along with information about their age, health condition, and hospital type.
 
 For Germany, three data sources were analysed:
 
@@ -64,9 +64,9 @@ For Germany, three data sources were analysed:
 
 Instead of just counting cases and deaths, the researchers measured the overall health impact using Disability-Adjusted Life Years (DALYs) by combining both:
 
--   Years of Life Lost (YLL) – deaths that occur earlier than expected
+-   Years of Life Lost (YLL) - deaths that occur earlier than expected
 
--   Years Lived with Disability (YLD) – time spent ill or recovering with reduced health.
+-   Years Lived with Disability (YLD) - time spent ill or recovering with reduced health.
 
 Together, these reflect the total number of healthy years removed from society by a disease. This allows different infections to be compared on a single scale, showing which ones cause the most harm overall.
 

@@ -18,7 +18,7 @@ about:
 
 ## Hi, I'm Andy
 
-I hold a **Bachelor of Economics** from Monash University and am completing my **Master of Business Analytics**, due to graduate in **July 2026**. Upon graduation I will be applying for a **Subclass 485 Graduate Visa**, so there are no work eligibility concerns. Therefore, I am fully available for full-time employment in Australia from July onwards.
+I hold a **Bachelor of Economics** and a **Master of Business Analytics** from Monash University which i just graduated back in **July 2026**. Upon graduation I will be applying for a **Subclass 485 Graduate Visa**, so there are no work eligibility concerns. Therefore, I am fully available for full-time employment in Australia from July onwards.
 
 My interest in analytics took off after diving into **machine learning** and **forecasting** during my undergraduate years, and I have since built that into real industry experience across data integration, reporting automation, and interactive dashboards. I am comfortable taking ambiguous problems end-to-end and communicating results clearly to both technical and non-technical stakeholders.
 

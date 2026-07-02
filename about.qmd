@@ -15,7 +15,7 @@ about:
 
 A results-driven Data Analytics graduate currently pursuing a Master of Business Analytics at Monash University, with hands-on expertise in R, Excel, SQL, Qlik, and Power Query. Skilled in building automated pipelines, interactive dashboards, and structured reporting solutions that turn complex data into clear, actionable insights.
 
-Beyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP — each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager.
+Beyond my core responsibilities, I have gone out of my way to contribute across four different teams during my internship at JBS Australia Pork (Rivalea): Commercial Finance, Sales, Logistics, and S&OP - each with their own unique environment, datasets, and challenges. This initiative earned me the personal recommendation of a senior leader from each team: a Commercial Finance Manager, a Logistic Team Leader, and a Talent Acquisition Manager.
 
 ---
 
@@ -41,30 +41,30 @@ Beyond my core responsibilities, I have gone out of my way to contribute across 
 
 ## Education
 
-### Master of Business Analytics — Monash University *(Completed July 2026)*
+### Master of Business Analytics - Monash University *(Completed July 2026)*
 
-### Bachelor of Economics | Major in Business Analysis — Monash University *(Completed 2024)*
+### Bachelor of Economics | Major in Business Analysis - Monash University *(Completed 2024)*
 
 ---
 
 ## Experience
 
-### Functional Analyst — JBS Australia HQ, IT Team *(June 2026 – Present)*
+### Functional Analyst - JBS Australia HQ, IT Team *(June 2026 – Present)*
 - Acting as the bridge between business stakeholders and the development team for JBS's Order to Cash systems, covering Sales, Pricing, Rebates, Accruals, Invoicing, Shipping, Billing, and Inventory Management.
 - Translating business needs into functional specifications and system designs, building SQL-based reports in MS SQL Server Management Studio, and writing and executing test plans.
 - Supporting end users through documentation and training on new and modified systems.
 
-### Financial Data Analyst Intern — JBS Australia Pork (Rivalea), Commercial Finance Team *(March 2026 – June 2026)*
+### Financial Data Analyst Intern - JBS Australia Pork (Rivalea), Commercial Finance Team *(March 2026 – June 2026)*
 - Developing a structured reporting database for the Commercial Finance team under manager guidance.
 - Consolidating and transforming financial data to a better format to improve data accessibility and reporting consistency.
 - Designing automation tools to streamline reporting workflows and reduce manual workload across the team.
 
-### Data Analyst Intern — JBS Australia Pork (Rivalea), S&OP Team *(Nov 2025 – February 2026)*
+### Data Analyst Intern - JBS Australia Pork (Rivalea), S&OP Team *(Nov 2025 – February 2026)*
 - Managed multiple projects concurrently to support S&OP reporting and analysis.
 - Extracted and prepared operational data using SQL, Qlik, and Pronto.
 - Consolidated data sources and built a structured reporting database using R, improving consistency and reusability for weekly reporting.
 
-### AIESEC — Business Development Officer *(Nov 2024 – Nov 2025)*
+### AIESEC - Business Development Officer *(Nov 2024 – Nov 2025)*
 - Identified and pursued partnership opportunities to expand AIESEC's network and visibility.
 - Negotiated agreements with corporate partners, securing sponsorships to support organisational goals.
 

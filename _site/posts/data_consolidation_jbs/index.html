@@ -8,7 +8,7 @@
 
 <meta name="author" content="Tran Dang Huy (Andy)">
 <meta name="dcterms.date" content="2025-12-01">
-<meta name="description" content="An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds.">
+<meta name="description" content="An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally - dropping the job to a few seconds.">
 
 <title>Automating Batch Consolidation with Bin-Packing in R – About me</title>
 <style>
@@ -157,9 +157,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#what-i-built" id="toc-what-i-built" class="nav-link" data-scroll-target="#what-i-built">What I built</a></li>
   <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a>
   <ul class="collapse">
-  <li><a href="#step-1-apply-the-business-rules-first" id="toc-step-1-apply-the-business-rules-first" class="nav-link" data-scroll-target="#step-1-apply-the-business-rules-first">Step 1 — Apply the business rules first</a></li>
-  <li><a href="#step-2-only-pack-things-that-are-allowed-to-go-together" id="toc-step-2-only-pack-things-that-are-allowed-to-go-together" class="nav-link" data-scroll-target="#step-2-only-pack-things-that-are-allowed-to-go-together">Step 2 — Only pack things that are allowed to go together</a></li>
-  <li><a href="#step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" id="toc-step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" class="nav-link" data-scroll-target="#step-3-fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 — Fill each batch as full as possible (the interesting bit)</a></li>
+  <li><a href="#step-1---apply-the-business-rules-first" id="toc-step-1---apply-the-business-rules-first" class="nav-link" data-scroll-target="#step-1---apply-the-business-rules-first">Step 1 - Apply the business rules first</a></li>
+  <li><a href="#step-2---only-pack-things-that-are-allowed-to-go-together" id="toc-step-2---only-pack-things-that-are-allowed-to-go-together" class="nav-link" data-scroll-target="#step-2---only-pack-things-that-are-allowed-to-go-together">Step 2 - Only pack things that are allowed to go together</a></li>
+  <li><a href="#step-3---fill-each-batch-as-full-as-possible-the-interesting-bit" id="toc-step-3---fill-each-batch-as-full-as-possible-the-interesting-bit" class="nav-link" data-scroll-target="#step-3---fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 - Fill each batch as full as possible (the interesting bit)</a></li>
   <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example">A worked example</a></li>
   </ul></li>
   <li><a href="#challenges-and-what-i-learned" id="toc-challenges-and-what-i-learned" class="nav-link" data-scroll-target="#challenges-and-what-i-learned">Challenges and what I learned</a></li>
@@ -182,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds.
+    An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally - dropping the job to a few seconds.
   </div>
 </div>
 
@@ -223,19 +223,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="the-problem-a-weekly-packing-puzzle-done-by-hand" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-a-weekly-packing-puzzle-done-by-hand">The problem: a weekly packing puzzle done by hand</h2>
-<p>An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock — many rows of items, each with a quantity — and had to <strong>consolidate them into batches</strong>. A batch normally holds up to <strong>36 items</strong> (a handful of special items, kept in a separate list, allow <strong>72</strong>).</p>
-<p>The catch is that you can’t just throw anything together. A batch can only combine rows that share the <strong>same item type</strong> <em>and</em> come from the <strong>same client and establishment (dispatch location)</strong>. And the goal isn’t just to make batches — it’s to make <strong>good</strong> batches: fill each one as close to full as possible so you’re left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what’s left over, not what fills a batch.</p>
-<p>Doing this well, by hand, took about <strong>30 minutes every week</strong> — and it was easy to end up with more loose batches than necessary.</p>
+<p>An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock - many rows of items, each with a quantity - and had to <strong>consolidate them into batches</strong>. A batch normally holds up to <strong>36 items</strong> (a handful of special items, kept in a separate list, allow <strong>72</strong>).</p>
+<p>The catch is that you can’t just throw anything together. A batch can only combine rows that share the <strong>same item type</strong> <em>and</em> come from the <strong>same client and establishment (dispatch location)</strong>. And the goal isn’t just to make batches - it’s to make <strong>good</strong> batches: fill each one as close to full as possible so you’re left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what’s left over, not what fills a batch.</p>
+<p>Doing this well, by hand, took about <strong>30 minutes every week</strong> - and it was easy to end up with more loose batches than necessary.</p>
 </section>
 <section id="what-i-built" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-built">What I built</h2>
-<p>A single R script. She drops the week’s stock export into a <code>Database</code> folder, runs the script, and gets back an Excel file where <strong>every row is tagged with a batch number</strong> (<code>Group</code>) — packed optimally. That’s it. The 30-minute puzzle became a few seconds.</p>
+<p>A single R script. She drops the week’s stock export into a <code>Database</code> folder, runs the script, and gets back an Excel file where <strong>every row is tagged with a batch number</strong> (<code>Group</code>) - packed optimally. That’s it. The 30-minute puzzle became a few seconds.</p>
 <p>Under the hood, this is a classic <strong>bin-packing problem</strong>, and I solved each batch’s fill with <strong>dynamic programming</strong> so the result is genuinely optimal, not just a rough guess.</p>
 </section>
 <section id="how-it-works" class="level2">
 <h2 class="anchored" data-anchor-id="how-it-works">How it works</h2>
-<section id="step-1-apply-the-business-rules-first" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-apply-the-business-rules-first">Step 1 — Apply the business rules first</h3>
+<section id="step-1---apply-the-business-rules-first" class="level3">
+<h3 class="anchored" data-anchor-id="step-1---apply-the-business-rules-first">Step 1 - Apply the business rules first</h3>
 <p>Before any packing, the script cleans and filters the data: it drops items that aren’t ready to ship (still pending a temperature change), applies a small cost-centre correction, and loads the special “list of 72” that gets the larger batch size.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"Database/Data.xlsx"</span>, <span class="at">skip =</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(<span class="st">`</span><span class="at">Temperature Change Due</span><span class="st">`</span>)) <span class="sc">%&gt;%</span>      <span class="co"># only ship-ready stock</span></span>
@@ -243,8 +243,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>list_72 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"Database/List of 72.xlsx"</span>)   <span class="co"># items that pack up to 72</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="step-2-only-pack-things-that-are-allowed-to-go-together" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-only-pack-things-that-are-allowed-to-go-together">Step 2 — Only pack things that are allowed to go together</h3>
+<section id="step-2---only-pack-things-that-are-allowed-to-go-together" class="level3">
+<h3 class="anchored" data-anchor-id="step-2---only-pack-things-that-are-allowed-to-go-together">Step 2 - Only pack things that are allowed to go together</h3>
 <p>The script finds every unique combination of <strong>(Client, Establishment, Product)</strong> and treats each one as its own independent packing problem. That guarantees a batch never mixes item types or dispatch locations, and it also keeps each sub-problem small enough to solve exactly.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>keys <span class="ot">&lt;-</span> <span class="fu">unique</span>(df[, <span class="fu">c</span>(<span class="st">"Client"</span>, <span class="st">"Estab"</span>, <span class="st">"Product"</span>)])</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(keys))) {</span>
@@ -252,14 +252,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  bs <span class="ot">&lt;-</span> <span class="cf">if</span> (prod_val <span class="sc">%in%</span> list_72) <span class="dv">72</span> <span class="cf">else</span> <span class="dv">36</span>   <span class="co"># special items get the bigger cap</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="step-3-fill-each-batch-as-full-as-possible-the-interesting-bit" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 — Fill each batch as full as possible (the interesting bit)</h3>
+<section id="step-3---fill-each-batch-as-full-as-possible-the-interesting-bit" class="level3">
+<h3 class="anchored" data-anchor-id="step-3---fill-each-batch-as-full-as-possible-the-interesting-bit">Step 3 - Fill each batch as full as possible (the interesting bit)</h3>
 <p>Within a group, the script repeatedly:</p>
 <ol type="1">
 <li>picks the <strong>largest remaining item</strong> as the “anchor” of a new batch, then</li>
 <li>finds the <strong>best combination of the other items</strong> that fits in the space left, getting as close to the cap as possible.</li>
 </ol>
-<p>That second step is a subset-sum solved with dynamic programming — it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:</p>
+<p>That second step is a subset-sum solved with dynamic programming - it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>best_subset_under <span class="ot">&lt;-</span> <span class="cf">function</span>(qty, <span class="at">cap =</span> <span class="dv">36</span>) {</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  ord  <span class="ot">&lt;-</span> <span class="fu">order</span>(qty, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  qty2 <span class="ot">&lt;-</span> qty[ord]</span>
@@ -275,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  target <span class="ot">&lt;-</span> <span class="cf">if</span> (dp[cap <span class="sc">+</span> <span class="dv">1</span>]) cap <span class="cf">else</span> <span class="fu">max</span>(<span class="fu">which</span>(dp) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">0</span>)  <span class="co"># best fill &lt;= cap</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...walk back through the table to recover which items made up `target`...</span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain — exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.</p>
+<p>Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain - exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.</p>
 </section>
 <section id="a-worked-example" class="level3">
 <h3 class="anchored" data-anchor-id="a-worked-example">A worked example</h3>
@@ -306,11 +306,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td>C</td>
 <td>3</td>
-<td>3 — small leftover</td>
+<td>3 - small leftover</td>
 </tr>
 </tbody>
 </table>
-<p>Two perfectly full batches and a single small remainder — instead of several awkward, half-filled ones.</p>
+<p>Two perfectly full batches and a single small remainder - instead of several awkward, half-filled ones.</p>
 </section>
 </section>
 <section id="challenges-and-what-i-learned" class="level2">
@@ -323,7 +323,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>A weekly 30-minute manual puzzle became a one-click, few-seconds job — and the batches it produces are more consistently full than hand-packing achieved. It’s a small script, but it’s a good example of turning a real operational headache into a clean, optimal, repeatable process.</p>
+<p>A weekly 30-minute manual puzzle became a one-click, few-seconds job - and the batches it produces are more consistently full than hand-packing achieved. It’s a small script, but it’s a good example of turning a real operational headache into a clean, optimal, repeatable process.</p>
 
 
 </section>

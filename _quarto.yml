@@ -11,6 +11,7 @@ project:
     - posts/data_consolidation_jbs/index.qmd
     - posts/export_shipment_jbs/index.qmd
     - posts/financial_forecast_jbs/index.qmd
+    - posts/sql_report_jbs/index.qmd
 
 
 website:

@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Tran Dang Huy (Andy)">
-<meta name="dcterms.date" content="2026-03-01">
-<meta name="description" content="An inventory controller spent 1-2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.">
+<meta name="dcterms.date" content="2026-06-23">
+<meta name="description" content="I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report - so staff can pull the data themselves with a few filters, no SQL required.">
 
-<title>Predicting Shipment Weeks with a Stock Simulation in R – About me</title>
+<title>Turning a SQL Query into a Self-Service Report – About me</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -153,18 +153,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-problem-forecasting-shipments-by-hand-every-week" id="toc-the-problem-forecasting-shipments-by-hand-every-week" class="nav-link active" data-scroll-target="#the-problem-forecasting-shipments-by-hand-every-week">The problem: forecasting shipments by hand, every week</a></li>
-  <li><a href="#what-it-produces" id="toc-what-it-produces" class="nav-link" data-scroll-target="#what-it-produces">What it produces</a></li>
-  <li><a href="#the-inputs" id="toc-the-inputs" class="nav-link" data-scroll-target="#the-inputs">The inputs</a></li>
-  <li><a href="#turning-a-messy-delivery-date-into-a-week-window" id="toc-turning-a-messy-delivery-date-into-a-week-window" class="nav-link" data-scroll-target="#turning-a-messy-delivery-date-into-a-week-window">Turning a messy “delivery date” into a week window</a></li>
-  <li><a href="#the-heart-of-it-simulating-stock-week-by-week" id="toc-the-heart-of-it-simulating-stock-week-by-week" class="nav-link" data-scroll-target="#the-heart-of-it-simulating-stock-week-by-week">The heart of it: simulating stock week by week</a>
-  <ul class="collapse">
-  <li><a href="#protecting-priority-orders---the-clever-bit" id="toc-protecting-priority-orders---the-clever-bit" class="nav-link" data-scroll-target="#protecting-priority-orders---the-clever-bit">Protecting priority orders - the clever bit</a></li>
-  <li><a href="#deciding-the-status" id="toc-deciding-the-status" class="nav-link" data-scroll-target="#deciding-the-status">Deciding the status</a></li>
-  </ul></li>
-  <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example">A worked example</a></li>
-  <li><a href="#challenges-and-what-i-learned" id="toc-challenges-and-what-i-learned" class="nav-link" data-scroll-target="#challenges-and-what-i-learned">Challenges and what I learned</a></li>
-  <li><a href="#the-outcome" id="toc-the-outcome" class="nav-link" data-scroll-target="#the-outcome">The outcome</a></li>
+  <li><a href="#the-idea-reports-people-can-run-themselves" id="toc-the-idea-reports-people-can-run-themselves" class="nav-link active" data-scroll-target="#the-idea-reports-people-can-run-themselves">The idea: reports people can run themselves</a></li>
+  <li><a href="#step-1---write-and-validate-the-sql" id="toc-step-1---write-and-validate-the-sql" class="nav-link" data-scroll-target="#step-1---write-and-validate-the-sql">Step 1 - Write and validate the SQL</a></li>
+  <li><a href="#step-2---rebuild-it-as-a-parameterised-report" id="toc-step-2---rebuild-it-as-a-parameterised-report" class="nav-link" data-scroll-target="#step-2---rebuild-it-as-a-parameterised-report">Step 2 - Rebuild it as a parameterised report</a></li>
+  <li><a href="#doing-it-properly-the-engineering-around-the-sql" id="toc-doing-it-properly-the-engineering-around-the-sql" class="nav-link" data-scroll-target="#doing-it-properly-the-engineering-around-the-sql">Doing it properly: the engineering around the SQL</a></li>
+  <li><a href="#where-its-heading" id="toc-where-its-heading" class="nav-link" data-scroll-target="#where-its-heading">Where it’s heading</a></li>
+  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
   </ul>
 </nav>
     </div>
@@ -173,17 +167,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Predicting Shipment Weeks with a Stock Simulation in R</h1>
+<h1 class="title">Turning a SQL Query into a Self-Service Report</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Project</div>
-    <div class="quarto-category">R</div>
-    <div class="quarto-category">Simulation</div>
+    <div class="quarto-category">SQL</div>
+    <div class="quarto-category">Data Engineering</div>
   </div>
   </div>
 
 <div>
   <div class="description">
-    An inventory controller spent 1-2 hours a week hand-forecasting which week each order could ship. I built a week-by-week stock simulation in R that predicts the shipment week for every order, protects priority orders, and flags the ones in trouble.
+    I wrote a complex SQL sales report, then rebuilt it inside the company’s enterprise reporting tool as a parameterised, self-service report - so staff can pull the data themselves with a few filters, no SQL required.
   </div>
 </div>
 
@@ -200,7 +194,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">March 1, 2026</p>
+      <p class="date">June 23, 2026</p>
     </div>
   </div>
   
@@ -212,166 +206,92 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p><img src="sql_skill.svg" class="img-fluid" alt="SQL skill: a database, relational tables joined together, and a SQL query with SELECT, JOIN, WHERE and GROUP BY."></p>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>This is a public write-up of a work project, so the real stock, production, and customer data has been kept private. The numbers in the worked example below are made-up illustrations.</p>
+<p>This is a public write-up of an internal reporting project. To protect the company, I’ve deliberately left out all sensitive details - database server names, connection strings, the real table/column schema, and business-specific logic. The SQL below is a <strong>generic, invented example</strong> that shows the <em>technique</em>, not the real query.</p>
 </div>
 </div>
 </div>
-<section id="the-problem-forecasting-shipments-by-hand-every-week" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-forecasting-shipments-by-hand-every-week">The problem: forecasting shipments by hand, every week</h2>
-<p>An inventory controller on the Logistics team had one of those tasks that quietly gets worse over time. Every week she had to look at all the open orders and, for each one, work out <strong>which week it could actually ship</strong> - juggling the stock currently on hand, the stock that production would add in the coming weeks, and which orders were urgent.</p>
-<p>With a handful of orders that’s manageable. But the order book kept growing, and the interactions between orders compounded: shipping one early might starve a more urgent one later. What started as a ~1 hour job crept up to <strong>1-2 hours every week</strong>, and the more orders there were, the easier it was to make a mistake or miss that an order was heading for a late delivery.</p>
-<p>So I built a model that does the whole thing automatically: it <strong>simulates stock forward through the year</strong> and, for every order, predicts the week it should ship - while also telling her exactly <strong>which orders are in trouble</strong> and why.</p>
+<section id="the-idea-reports-people-can-run-themselves" class="level2">
+<h2 class="anchored" data-anchor-id="the-idea-reports-people-can-run-themselves">The idea: reports people can run themselves</h2>
+<p>A lot of business reporting still works like this: someone needs a number, so they ask an analyst, who writes or runs a query and sends back a spreadsheet. It works, but it doesn’t scale - every question is a round trip.</p>
+<p>I wanted to build the opposite: a <strong>self-service report</strong>. The analyst (me) writes and validates the SQL once; after that, anyone can open the report in the company’s reporting tool, type in a few filters - a date range, a plant, a customer - and get exactly the slice of data they need, without ever seeing a line of SQL.</p>
+<p>The first report I built this way was a <strong>daily sales report</strong> (for SOX compliance): a clean, one-row-per-order-line view of what was sold, to whom, where it was going, and what it was worth.</p>
 </section>
-<section id="what-it-produces" class="level2">
-<h2 class="anchored" data-anchor-id="what-it-produces">What it produces</h2>
-<p>The controller drops the week’s data into a <code>Data</code> folder and runs the script. Out comes a results file where every order has:</p>
+<section id="step-1---write-and-validate-the-sql" class="level2">
+<h2 class="anchored" data-anchor-id="step-1---write-and-validate-the-sql">Step 1 - Write and validate the SQL</h2>
+<p>The foundation is a single, fairly involved query. It joins the order, line, product, customer, currency and destination tables together and flattens them into one tidy row per order line. Along the way it does the unglamorous-but-essential work that makes a report trustworthy:</p>
 <ul>
-<li>a <strong>predicted shipment week</strong>;</li>
-<li>a <strong>status</strong> - <em>On time</em>, <em>Delayed</em> (with how many weeks late), <em>Cannot deliver this year</em>, or a data problem such as <em>Missing SOH / Production / Code</em>, <em>Missing Shipment Period</em>, or <em>Invalid Quantity</em>;</li>
-<li>the <strong>stock available before and after</strong> that order ships, so the reasoning is transparent.</li>
+<li><strong>Currency conversion</strong> - every sale value is converted from its order currency into AUD using the exchange rate <em>on the sale date</em>, while also keeping the original foreign-currency value.</li>
+<li><strong>Unit conversion</strong> - order weights are converted into a single common unit (kilograms), regardless of the unit they were entered in.</li>
+<li><strong>Correct grain</strong> - careful joins and de-duplication so the report is exactly one row per line, with no accidental fan-out.</li>
 </ul>
-<p>That status column is the part she values most: instead of discovering a late shipment by accident, the model surfaces every problem order up front.</p>
+<p>While developing, I used <code>DECLARE</code> statements at the top to hard-code test values so I could run and check the query locally until the numbers were right:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- During development: hard-code inputs to test the query locally</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">declare</span> @StartDate <span class="dt">date</span> <span class="op">=</span> <span class="st">'2026-05-06'</span>;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">declare</span> @EndDate   <span class="dt">date</span> <span class="op">=</span> <span class="st">'2026-05-06'</span>;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">declare</span> @Plant     <span class="dt">varchar</span>(<span class="dv">20</span>) <span class="op">=</span> <span class="st">''</span>;</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    o.OrderNumber,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    p.ProductCode,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    c.CustomerName,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    SaleValueAud <span class="op">=</span> <span class="fu">cast</span>(l.NativeAmount <span class="op">*</span> fx.Rate <span class="kw">as</span> <span class="dt">decimal</span>(<span class="dv">18</span>,<span class="dv">2</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span>      Orders      o</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">join</span>      OrderLines  l <span class="kw">on</span> l.OrderId    <span class="op">=</span> o.<span class="kw">Id</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">join</span>      Products    p <span class="kw">on</span> p.<span class="kw">Id</span>         <span class="op">=</span> l.ProductId</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">join</span>      Customers   c <span class="kw">on</span> c.<span class="kw">Id</span>         <span class="op">=</span> o.CustomerId</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span>     o.SaleDate <span class="kw">between</span> @StartDate <span class="kw">and</span> @EndDate</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span>     (@Plant <span class="op">=</span> <span class="st">''</span> <span class="kw">or</span> o.Plant <span class="op">=</span> @Plant);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><em>(All names above are invented placeholders - the real query is more involved and against a different schema.)</em></p>
 </section>
-<section id="the-inputs" class="level2">
-<h2 class="anchored" data-anchor-id="the-inputs">The inputs</h2>
-<p>The model pulls together five sources and reduces them to a common per-product view:</p>
+<section id="step-2---rebuild-it-as-a-parameterised-report" class="level2">
+<h2 class="anchored" data-anchor-id="step-2---rebuild-it-as-a-parameterised-report">Step 2 - Rebuild it as a parameterised report</h2>
+<p>This is the part that makes it self-service, and the part I found most interesting. The company uses an <strong>enterprise ERP reporting tool</strong> (a grid-style report builder). Once my SQL returned the right table, I moved it into that tool and reshaped it into a report:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="cover.svg" class="img-fluid figure-img" alt="Diagram showing a validated SQL query flowing into an ERP report tool where DECLAREs become parameters and result columns define a grid, producing a self-service report."></p>
+<figcaption>The workflow: a validated SQL query becomes a self-service report - its <code>DECLARE</code>s turn into user parameters, and result columns define the output grid.</figcaption>
+</figure>
+</div>
+<ol type="1">
+<li><strong>Paste the SQL</strong> into the tool’s SQL statement.</li>
+<li><strong>Remove the <code>DECLARE</code> statements.</strong> Those were only for local testing - the tool doesn’t want hard-coded values.</li>
+<li><strong>Recreate each <code>DECLARE</code> as a Parameter.</strong> Every variable I’d hard-coded becomes a user input field: <em>Start Date</em>, <em>End Date</em>, <em>Plant</em>, <em>Customer</em>, <em>Product</em>, <em>Status</em>. At runtime the tool injects whatever the user types into the query in place of the old variables.</li>
+<li><strong>Define the Result Columns</strong> - the output structure: which columns appear, their labels, their data types, and their formatting (number masks, date formats). This is what turns a raw result set into a clean, readable grid.</li>
+</ol>
+<p>The result: a report where a user picks a date range and a couple of filters, hits run, and gets the matching data table - powered by my SQL, but with none of its complexity exposed.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- In the report tool, the DECLAREs are gone; the tool supplies the values from</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- the user's parameter inputs. The query body just references them:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span> o.SaleDate <span class="kw">between</span> @StartDate <span class="kw">and</span> @EndDate</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> (@Plant    <span class="op">=</span> <span class="st">''</span> <span class="kw">or</span> o.Plant       <span class="op">=</span> @Plant)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> (@Customer <span class="op">=</span> <span class="st">''</span> <span class="kw">or</span> c.CustomerName <span class="kw">like</span> <span class="st">'%'</span> <span class="op">+</span> @Customer <span class="op">+</span> <span class="st">'%'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="doing-it-properly-the-engineering-around-the-sql" class="level2">
+<h2 class="anchored" data-anchor-id="doing-it-properly-the-engineering-around-the-sql">Doing it properly: the engineering around the SQL</h2>
+<p>The query is only half the work. To make this reliable and maintainable, I also:</p>
 <ul>
-<li><strong>Booking data</strong> (export orders) and <strong>open sales orders</strong> (domestic) → combined into one order book;</li>
-<li><strong>Production</strong> from both plants → averaged into a <strong>weekly production rate</strong> per product;</li>
-<li><strong>Stock on hand</strong> → the <strong>starting stock</strong> per product.</li>
-</ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Production becomes a weekly *rate* (total over the recent window / number_of_weeks)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>production_expanded <span class="ot">&lt;-</span> total_production <span class="sc">%&gt;%</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Code)) <span class="sc">%&gt;%</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Code) <span class="sc">%&gt;%</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Production =</span> <span class="fu">sum</span>(Production, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> number_of_weeks,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Stock on hand is summed per product; non-numeric codes (e.g. "XPLT") are dropped</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># so Code stays a unique key and later joins enrich rows instead of multiplying them.</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>stock_on_hand_expanded <span class="ot">&lt;-</span> stock_on_hand_new <span class="sc">%&gt;%</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Code) <span class="sc">%&gt;%</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">SOH =</span> <span class="fu">sum</span>(SOH, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">as.numeric</span>(Code)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="turning-a-messy-delivery-date-into-a-week-window" class="level2">
-<h2 class="anchored" data-anchor-id="turning-a-messy-delivery-date-into-a-week-window">Turning a messy “delivery date” into a week window</h2>
-<p>Orders don’t state their timing consistently. Some say a week (<code>W10</code>, <code>Week 10</code>, <code>10</code>), some give a month or even a range of months (<code>March</code>, <code>Jan-Mar</code>). The model normalises all of that into a <strong>delivery window</strong> - an earliest and latest week the order is allowed to ship in:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A week reference -&gt; that exact week; a month (or month range) -&gt; the ISO weeks</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># spanning the 1st of the earliest month to the last day of the latest month.</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>shipment_period_to_weeks <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">yr =</span> <span class="fu">year</span>(<span class="fu">Sys.Date</span>())) {</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...detect "W10 / Week 10 / 10"  -&gt; start_week = end_week = 10</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...detect month tokens          -&gt; start_week = isoweek(first day),</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                     end_week   = isoweek(last day)</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Distinct periods are parsed <strong>once</strong> and joined back on, rather than re-parsing the same text for every order - a small but meaningful speed-up on a large order book. Every order ends up with a <code>start_week</code> (earliest it can go) and <code>end_week</code> (its deadline).</p>
-</section>
-<section id="the-heart-of-it-simulating-stock-week-by-week" class="level2">
-<h2 class="anchored" data-anchor-id="the-heart-of-it-simulating-stock-week-by-week">The heart of it: simulating stock week by week</h2>
-<p>The core function runs <strong>one product code at a time</strong> (all its orders together), because orders only compete for the stock of their own product. Starting from the current week, it steps forward week by week. Each week it first tops up stock with that week’s production, then decides what to ship:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (w <span class="cf">in</span> current_week<span class="sc">:</span>max_week) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  stock <span class="ot">&lt;-</span> stock <span class="sc">+</span> prod                    <span class="co"># this week's production arrives</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1) Ship PRIORITY orders that are due/overdue (end_week &lt;= w), earliest deadline first</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#    ...ship each if stock &gt;= qty, recording before/after stock and the ship week...</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) If a due priority order still can't be shipped, STOP for this week -</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#    don't spend stock on anything else; let it accumulate.</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (any_priority_still_due_and_unshipped) <span class="cf">next</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 3) Work out how much stock must be RESERVED for future priority orders</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  reserve <span class="ot">&lt;-</span> <span class="fu">reserve_needed</span>(w, remaining_priority_rows)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 4) Ship NON-priority orders, but only from stock ABOVE that reserve</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">#    ...ship each if (stock &gt;= qty) AND (stock - qty &gt;= reserve)...</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (all_orders_for_this_code_shipped) <span class="cf">break</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="protecting-priority-orders---the-clever-bit" class="level3">
-<h3 class="anchored" data-anchor-id="protecting-priority-orders---the-clever-bit">Protecting priority orders - the clever bit</h3>
-<p>The subtle part is step 3. It’s not enough to ship priority orders when they’re due; you have to make sure that <em>today’s</em> non-priority shipments don’t quietly use up stock that a priority order will need later. So before shipping anything non-priority, the model calculates a <strong>reserve</strong>: the amount of current stock that must be held back so every remaining priority order can still be met by its deadline, given the production expected to arrive in the meantime.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>reserve_needed <span class="ot">&lt;-</span> <span class="cf">function</span>(w, remaining_priority_rows) {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  pri <span class="ot">&lt;-</span> remaining_priority <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(end_week)      <span class="co"># by deadline</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  cum_qty   <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(pri<span class="sc">$</span>Quantity)                    <span class="co"># cumulative demand by each deadline</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  deadlines <span class="ot">&lt;-</span> pri<span class="sc">$</span>end_week</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># demand due by each deadline, minus production that will arrive before then:</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  req <span class="ot">&lt;-</span> cum_qty <span class="sc">-</span> prod <span class="sc">*</span> <span class="fu">pmax</span>(<span class="dv">0</span>L, deadlines <span class="sc">-</span> w)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span>(<span class="dv">0</span>, <span class="fu">max</span>(req, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))                        <span class="co"># worst-case shortfall = reserve</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>In plain terms: for each priority deadline it asks <em>“how much stock do I need right now to cover everything due by then, after counting the production I’ll receive before that date?”</em> - and reserves the largest of those requirements. Non-priority orders can only draw on stock <strong>above</strong> that line. This is what stops a routine order from accidentally making an urgent one late.</p>
-</section>
-<section id="deciding-the-status" class="level3">
-<h3 class="anchored" data-anchor-id="deciding-the-status">Deciding the status</h3>
-<p>Once an order’s shipment week is known, its status writes itself:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.na</span>(ship_week))            status <span class="ot">&lt;-</span> <span class="st">"Cannot deliver this year"</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> <span class="cf">if</span> (ship_week <span class="sc">&gt;</span> end_week)   { status <span class="ot">&lt;-</span> <span class="st">"Delayed"</span>; delay_weeks <span class="ot">&lt;-</span> ship_week <span class="sc">-</span> end_week }</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>                             { status <span class="ot">&lt;-</span> <span class="st">"On time"</span>;  delay_weeks <span class="ot">&lt;-</span> <span class="dv">0</span> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Orders that never got a shipment week (not enough stock + production all year) are flagged <em>Cannot deliver</em>; anything shipping after its deadline is <em>Delayed</em> with the exact number of weeks. Separately, orders missing a product code, stock figure, production figure, quantity or period are flagged as data problems <strong>instead of being silently dropped</strong> - every input row comes back in the output with an explanation.</p>
-</section>
-</section>
-<section id="a-worked-example" class="level2">
-<h2 class="anchored" data-anchor-id="a-worked-example">A worked example</h2>
-<p>Say one product has <strong>10 units in stock</strong>, produces <strong>4 units/week</strong>, and it’s currently <strong>week 10</strong>. Two orders are open:</p>
-<ul>
-<li><strong>Order A - priority</strong>, 20 units, due <strong>week 12</strong></li>
-<li><strong>Order B - normal</strong>, 6 units, ready from week 10</li>
-</ul>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 54%">
-<col style="width: 31%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Week</th>
-<th>Stock after production</th>
-<th>What happens</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>10</td>
-<td>14</td>
-<td>A not due yet. Reserve for A = 20 − 4×2 = <strong>12</strong>. B needs 6, but 14 − 6 = 8 &lt; 12 → <strong>B waits</strong> to protect A</td>
-</tr>
-<tr class="even">
-<td>11</td>
-<td>18</td>
-<td>Reserve = 20 − 4×1 = <strong>16</strong>. 18 − 6 = 12 &lt; 16 → <strong>B still waits</strong></td>
-</tr>
-<tr class="odd">
-<td>12</td>
-<td>22</td>
-<td>A is due → <strong>ship A (on time)</strong>, stock → 2. Reserve now 0, but B needs 6 &gt; 2 → B waits</td>
-</tr>
-<tr class="even">
-<td>13</td>
-<td>6</td>
-<td><strong>Ship B</strong>, stock → 0</td>
-</tr>
-</tbody>
-</table>
-<p>Order B <em>could</em> physically have shipped in week 10 if we were careless - but doing so would have made the priority order A late. The reserve logic holds B back until A is safe. If B’s own deadline had been week 11, the model would have shipped it in week 13 and flagged it <strong>Delayed by 2 weeks</strong> - exactly the kind of early warning the controller needs.</p>
-</section>
-<section id="challenges-and-what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="challenges-and-what-i-learned">Challenges and what I learned</h2>
-<ul>
-<li><strong>Feasibility, not just greed.</strong> A naive “ship whatever’s due” rule quietly breaks priority deadlines. The reserve calculation turns the loop from a greedy dispatcher into one that looks ahead and guarantees priority orders stay feasible.</li>
-<li><strong>Messy real-world timing.</strong> Delivery periods arrived as weeks, months, and ranges. Normalising them into a start/end week window was essential before any simulation could run.</li>
-<li><strong>Never drop a row silently.</strong> In an operational tool, an order that vanishes because of a missing code is dangerous. Every row is preserved and labelled, so nothing slips through unnoticed.</li>
-<li><strong>Per-product decomposition.</strong> Running the simulation independently per product code keeps each problem small and fast, and mirrors how the stock actually behaves.</li>
+<li><strong>Built a data dictionary.</strong> Enterprise schemas are full of coded columns whose meaning isn’t obvious (order <em>type</em> vs.&nbsp;domestic/export <em>flag</em>, product class codes, and so on). I confirmed each one against the database and recorded it - with <em>how</em> and <em>when</em> it was verified - so I (and anyone after me) can trust those meanings without re-querying every time.</li>
+<li><strong>Handled test-vs-production data gaps.</strong> I built and validated the report in a test (UAT) environment where some master-data fields aren’t populated yet. Rather than hide that, I documented each field as a known gap that’s expected to fill in once it runs against production - so the joins are already correct and ready.</li>
+<li><strong>Documented every assumption.</strong> Some definitions genuinely needed a manager’s sign-off (which date counts as the official “sale” date, how a particular price should be defined). I flagged each one clearly in the code and spec as an open question rather than quietly guessing.</li>
 </ul>
 </section>
-<section id="the-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="the-outcome">The outcome</h2>
-<p>A 1-2 hour weekly forecast - one that got harder as the order book grew - became an automated run that predicts a shipment week for every order, keeps urgent orders protected, and hands the controller a ready-made list of the orders that need her attention. It’s the most logically involved project I’ve built, and the one where getting the <em>rules</em> right mattered just as much as getting the code right.</p>
+<section id="where-its-heading" class="level2">
+<h2 class="anchored" data-anchor-id="where-its-heading">Where it’s heading</h2>
+<p>Right now the report lives inside the reporting tool. The bigger plan is to build a proper <strong>UI / app on top of it</strong>, so that anyone across the business can open a simple web page, choose their filters, and look up this information directly - turning a one-off analyst query into a genuine self-service tool that scales to the whole company.</p>
+</section>
+<section id="what-i-learned" class="level2">
+<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
+<ul>
+<li><strong>A report is a product, not a query.</strong> The SQL is the engine, but parameters, column formatting, documented assumptions and verified lookups are what make it something other people can actually trust and use.</li>
+<li><strong>Design for the next person.</strong> The data dictionary and the documented gaps mean this report can be handed over, extended, or moved to production without someone having to reverse-engineer my thinking.</li>
+<li><strong>Self-service is a force multiplier.</strong> Every filter I exposed as a parameter is a question the business can now answer on its own, instead of waiting on an analyst.</li>
+</ul>
 
 
 </section>

@@ -2,7 +2,7 @@
 title: "A Real-Time Yield Dashboard in R Shiny"
 author: "Tran Dang Huy (Andy)"
 title-block-banner: false
-description: "How I replaced a fragile Excel workflow with an interactive R Shiny app that lets a manager change allocations and watch the yield breakdown update instantly — then download the result as a CSV."
+description: "How I replaced a fragile Excel workflow with an interactive R Shiny app that lets a manager change allocations and watch the yield breakdown update instantly - then download the result as a CSV."
 date: 2025-11-15
 categories: [Project, Shiny, R]
 image: dashboard_plot.png
@@ -14,11 +14,11 @@ This is a public write-up of a work project, so the real operational figures hav
 
 ## The problem: "I just want to change a number and see the graph move"
 
-My manager had a very reasonable ask. He wanted a tool where he could **change a few input numbers — the allocation of each cut — and immediately see how it changed the total product coming out**, broken down in a detailed graph.
+My manager had a very reasonable ask. He wanted a tool where he could **change a few input numbers - the allocation of each cut - and immediately see how it changed the total product coming out**, broken down in a detailed graph.
 
 That sounds like a job for Excel. But it isn't, really. Getting Excel to recalculate a *stacked, per-week, per-primal* breakdown and redraw it cleanly every time you nudge one number is either impossible or a huge, fragile amount of work in formulas and Power Query. The moment the shape of the data changed, it would break.
 
-So instead of fighting Excel, I built a small **web app in R Shiny** that does exactly what he wanted — and put it online so he could use it from a browser, no code required.
+So instead of fighting Excel, I built a small **web app in R Shiny** that does exactly what he wanted - and put it online so he could use it from a browser, no code required.
 
 🔗 **Live app:** [andytran78.shinyapps.io/Interactive_dashboard](https://andytran78.shinyapps.io/Interactive_dashboard/) *(upload the input workbook to populate it)*
 
@@ -26,13 +26,13 @@ So instead of fighting Excel, I built a small **web app in R Shiny** that does e
 
 The manager uploads his Excel workbook, and the app turns it into an interactive dashboard with two tabs.
 
-### 1. The plot — instant visual feedback
+### 1. The plot - instant visual feedback
 
 ![The Plot tab: a stacked bar of cut-option KG per week for the selected location and primal, with each cut's allocation % labelled on the bar.](dashboard_plot.png)
 
-He picks a **Location** and a **PRIMAL** (e.g. Belly), and gets a stacked bar chart of the KG produced by each cut option, week by week, with the allocation percentage printed right on each segment. Hovering a bar reveals the exact product-level breakdown. The five parameters on the left (grade split, grade weights, CCW index) are live too — change one and the whole chart recomputes.
+He picks a **Location** and a **PRIMAL** (e.g. Belly), and gets a stacked bar chart of the KG produced by each cut option, week by week, with the allocation percentage printed right on each segment. Hovering a bar reveals the exact product-level breakdown. The five parameters on the left (grade split, grade weights, CCW index) are live too - change one and the whole chart recomputes.
 
-### 2. The allocation editor — change a number, see it flow through
+### 2. The allocation editor - change a number, see it flow through
 
 ![The Allocation tab: an editable table of allocation % per cut option, with a live running total, a reset button, and a CSV download.](dashboard_allocation.png)
 
@@ -111,9 +111,9 @@ output$download_alloc <- downloadHandler(
 
 - **Reshaping messy input.** The workbook stores allocations in a wide, human-friendly layout; the app reshapes each sheet from wide to long so everything can be joined and computed cleanly.
 - **Two allocation scales.** People enter allocations as either `0.25` or `25%`. I added a small detector so the totals and bar labels behave correctly either way, instead of forcing one convention on the user.
-- **Keeping edits in sync.** The editable table only ever shows one slice, so edits had to be written back to the *full* dataset by key — not just the visible rows — or the plot would fall out of sync.
+- **Keeping edits in sync.** The editable table only ever shows one slice, so edits had to be written back to the *full* dataset by key - not just the visible rows - or the plot would fall out of sync.
 - **Shipping it.** Deploying to shinyapps.io meant the manager just needed a link, not R, to use the tool.
 
 ## The outcome
 
-What used to be an impossible-in-Excel request became a live, shareable tool. My manager can now explore "what-if" allocation scenarios in near real time, see the impact across all 52 weeks and every primal, and export the result — turning a manual spreadsheet chore into an interactive decision-support app that a non-coder can drive.
+What used to be an impossible-in-Excel request became a live, shareable tool. My manager can now explore "what-if" allocation scenarios in near real time, see the impact across all 52 weeks and every primal, and export the result - turning a manual spreadsheet chore into an interactive decision-support app that a non-coder can drive.

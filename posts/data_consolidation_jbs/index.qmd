@@ -2,7 +2,7 @@
 title: "Automating Batch Consolidation with Bin-Packing in R"
 author: "Tran Dang Huy (Andy)"
 title-block-banner: false
-description: "An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally — dropping the job to a few seconds."
+description: "An inventory controller spent ~30 minutes a week hand-packing stock into batches. I replaced it with an R script that solves the packing problem optimally - dropping the job to a few seconds."
 date: 2025-12-01
 categories: [Project, R, Optimisation]
 image: cover.svg
@@ -14,21 +14,21 @@ This is a public write-up of a work project, so the real stock data has been kep
 
 ## The problem: a weekly packing puzzle done by hand
 
-An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock — many rows of items, each with a quantity — and had to **consolidate them into batches**. A batch normally holds up to **36 items** (a handful of special items, kept in a separate list, allow **72**).
+An inventory controller on the Logistics team had a recurring task. Every week she received a list of stock - many rows of items, each with a quantity - and had to **consolidate them into batches**. A batch normally holds up to **36 items** (a handful of special items, kept in a separate list, allow **72**).
 
-The catch is that you can't just throw anything together. A batch can only combine rows that share the **same item type** *and* come from the **same client and establishment (dispatch location)**. And the goal isn't just to make batches — it's to make **good** batches: fill each one as close to full as possible so you're left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what's left over, not what fills a batch.
+The catch is that you can't just throw anything together. A batch can only combine rows that share the **same item type** *and* come from the **same client and establishment (dispatch location)**. And the goal isn't just to make batches - it's to make **good** batches: fill each one as close to full as possible so you're left with as few small, half-empty batches as possible. Big quantities like 26 or 15 should be consolidated into full batches; little stragglers like 1 or 2 should be what's left over, not what fills a batch.
 
-Doing this well, by hand, took about **30 minutes every week** — and it was easy to end up with more loose batches than necessary.
+Doing this well, by hand, took about **30 minutes every week** - and it was easy to end up with more loose batches than necessary.
 
 ## What I built
 
-A single R script. She drops the week's stock export into a `Database` folder, runs the script, and gets back an Excel file where **every row is tagged with a batch number** (`Group`) — packed optimally. That's it. The 30-minute puzzle became a few seconds.
+A single R script. She drops the week's stock export into a `Database` folder, runs the script, and gets back an Excel file where **every row is tagged with a batch number** (`Group`) - packed optimally. That's it. The 30-minute puzzle became a few seconds.
 
 Under the hood, this is a classic **bin-packing problem**, and I solved each batch's fill with **dynamic programming** so the result is genuinely optimal, not just a rough guess.
 
 ## How it works
 
-### Step 1 — Apply the business rules first
+### Step 1 - Apply the business rules first
 
 Before any packing, the script cleans and filters the data: it drops items that aren't ready to ship (still pending a temperature change), applies a small cost-centre correction, and loads the special "list of 72" that gets the larger batch size.
 
@@ -40,7 +40,7 @@ data <- read_excel("Database/Data.xlsx", skip = 4) %>%
 list_72 <- read_excel("Database/List of 72.xlsx")   # items that pack up to 72
 ```
 
-### Step 2 — Only pack things that are allowed to go together
+### Step 2 - Only pack things that are allowed to go together
 
 The script finds every unique combination of **(Client, Establishment, Product)** and treats each one as its own independent packing problem. That guarantees a batch never mixes item types or dispatch locations, and it also keeps each sub-problem small enough to solve exactly.
 
@@ -52,14 +52,14 @@ for (k in seq_len(nrow(keys))) {
 }
 ```
 
-### Step 3 — Fill each batch as full as possible (the interesting bit)
+### Step 3 - Fill each batch as full as possible (the interesting bit)
 
 Within a group, the script repeatedly:
 
 1. picks the **largest remaining item** as the "anchor" of a new batch, then
 2. finds the **best combination of the other items** that fits in the space left, getting as close to the cap as possible.
 
-That second step is a subset-sum solved with dynamic programming — it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:
+That second step is a subset-sum solved with dynamic programming - it checks which totals up to the remaining capacity are achievable, then reconstructs the exact items that hit the highest one:
 
 ```r
 best_subset_under <- function(qty, cap = 36) {
@@ -79,7 +79,7 @@ best_subset_under <- function(qty, cap = 36) {
 }
 ```
 
-Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain — exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.
+Anchoring on the biggest item first means large quantities get placed into full batches early, and the small stragglers are what remain - exactly the behaviour that was wanted. Any single row bigger than the cap simply gets a batch to itself.
 
 ### A worked example
 
@@ -93,9 +93,9 @@ The engine produces:
 |-------|--------------|-------|
 | A | 26 + 10 | **36** ✅ full |
 | B | 15 + 12 + 8 + 1 | **36** ✅ full |
-| C | 3 | 3 — small leftover |
+| C | 3 | 3 - small leftover |
 
-Two perfectly full batches and a single small remainder — instead of several awkward, half-filled ones.
+Two perfectly full batches and a single small remainder - instead of several awkward, half-filled ones.
 
 ## Challenges and what I learned
 
@@ -105,4 +105,4 @@ Two perfectly full batches and a single small remainder — instead of several a
 
 ## The outcome
 
-A weekly 30-minute manual puzzle became a one-click, few-seconds job — and the batches it produces are more consistently full than hand-packing achieved. It's a small script, but it's a good example of turning a real operational headache into a clean, optimal, repeatable process.
+A weekly 30-minute manual puzzle became a one-click, few-seconds job - and the batches it produces are more consistently full than hand-packing achieved. It's a small script, but it's a good example of turning a real operational headache into a clean, optimal, repeatable process.

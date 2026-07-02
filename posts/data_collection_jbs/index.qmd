@@ -9,12 +9,12 @@ image: cover.svg
 ---
 
 ::: {.callout-note appearance="simple"}
-The figures, customers and file contents shown in this project are **not** included here — this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.
+The figures, customers and file contents shown in this project are **not** included here - this is a public write-up of a work project, so all real company data has been kept private. Everything below focuses on the design, the code, and the thinking behind it.
 :::
 
 ## The problem: too many files, not enough time
 
-While working on the **Sales & Operations Planning (S&OP)** side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed *one* clean, consolidated view of the business — how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially — across several production plants.
+While working on the **Sales & Operations Planning (S&OP)** side of a large pork producer, I ran into a very ordinary but very painful problem: every single week, the planning team needed *one* clean, consolidated view of the business - how much stock we were holding, what we had dispatched, what we had produced, what customers had ordered, and what it was all worth financially - across several production plants.
 
 The catch was that none of this data lived in one place. Each plant exported its own files, in its own format, from its own system:
 
@@ -68,7 +68,7 @@ Complete_file/          <- one cleaned output per week
   ...
 ```
 
-Because the layout is always the same, the code never has to guess where anything is — it just needs to know *which week* I want. That predictability is what makes the pipeline repeatable.
+Because the layout is always the same, the code never has to guess where anything is - it just needs to know *which week* I want. That predictability is what makes the pipeline repeatable.
 
 ## The core idea: one key to join everything
 
@@ -103,7 +103,7 @@ Year_Week = paste0(Year, Week_2d)   # -> "202603"
 
 ### 2. Clean each source into the same shape
 
-Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the `Key`. Dispatch is a good example — the raw CSV becomes three tidy columns:
+Each source gets the same treatment: select the few columns that matter, rename them to a consistent standard, aggregate to the item level, and attach the `Key`. Dispatch is a good example - the raw CSV becomes three tidy columns:
 
 ```r
 corowa_dispatch <- corowa_dispatch %>%
@@ -114,7 +114,7 @@ corowa_dispatch <- corowa_dispatch %>%
   mutate(Key = paste0(Item, "Corowa"))
 ```
 
-The same pattern is repeated for stock, production, forecast, finance and sales — each ending up as a small table keyed by `Key`. Handling each source's quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn't silently fail.
+The same pattern is repeated for stock, production, forecast, finance and sales - each ending up as a small table keyed by `Key`. Handling each source's quirks was half the work: CSVs needed different numbers of header rows skipped, delivery dates had to be converted to ISO week numbers, and item codes had to be forced to text so the joins wouldn't silently fail.
 
 ### 3. Join it all into one table
 
@@ -175,12 +175,12 @@ That list gets exported each run, so gaps get caught and fixed instead of quietl
 
 ## Challenges and what I learned
 
-- **Real-world data is never tidy.** Most of the effort went into the unglamorous work of reconciling inconsistent formats — different header rows, mismatched column names, CSV vs. Excel vs. binary `.xlsb`, and item codes stored as numbers in one file and text in another.
+- **Real-world data is never tidy.** Most of the effort went into the unglamorous work of reconciling inconsistent formats - different header rows, mismatched column names, CSV vs. Excel vs. binary `.xlsb`, and item codes stored as numbers in one file and text in another.
 - **Design for repeatability.** Committing to one folder convention and one join key turned a fragile manual process into something I could re-run for any week with a two-line change.
-- **Fail loudly, not silently.** The missing-items check taught me that in data work, the dangerous errors aren't the ones that crash — they're the ones that quietly produce a plausible-but-wrong number.
+- **Fail loudly, not silently.** The missing-items check taught me that in data work, the dangerous errors aren't the ones that crash - they're the ones that quietly produce a plausible-but-wrong number.
 
 ## The outcome
 
-What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It's scalable across weeks, years and plants, and — just as importantly — it's **auditable**: anyone can see exactly how each number was built.
+What used to be a slow, error-prone, manual afternoon of copy-pasting became a repeatable pipeline that produces a clean, consistent weekly dataset and a single combined database for reporting. It's scalable across weeks, years and plants, and - just as importantly - it's **auditable**: anyone can see exactly how each number was built.
 
 It's a small project, but it's a good example of the kind of work I enjoy: taking a messy, real operational problem and turning it into something clean, reliable and reusable.
